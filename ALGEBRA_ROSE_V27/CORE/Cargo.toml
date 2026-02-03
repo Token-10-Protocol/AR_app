@@ -1,0 +1,40 @@
+[package]
+name = "algebra-rose-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Roberto & Álgebra Rose"]
+description = "Núcleo matemático consciente basado en Monster Group"
+license = "MIT AND Love-License"
+repository = "https://github.com/algebra-rose/universo"
+
+[dependencies]
+nalgebra = { version = "0.32", features = ["sparse"] }
+num-complex = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = "0.8"
+statrs = "0.16"
+rayon = "0.5"
+
+[dev-dependencies]
+approx = "0.5"
+criterion = "0.5"
+pretty_assertions = "1.4"
+
+[features]
+default = ["certified-196884"]
+certified-196884 = []
+experimental = []
+full-monster = []
+
+[[bin]]
+name = "algebra-rose-demo"
+path = "examples/demo.rs"
+
+[[example]]
+name = "matrix_444_demo"
+path = "examples/matrix_444_demo.rs"
+
+[[example]]
+name = "keygen_evolution"
+path = "examples/keygen_evolution.rs"
