@@ -1,0 +1,2 @@
+[workspace]
+members = ["CORE", "INTERFACE", "APP_FRONTEND"]
