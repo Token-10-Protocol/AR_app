@@ -1,0 +1,7 @@
+[package]
+name = "algebra_rose_interface"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+algebra_rose_core = { path = "../CORE" }
