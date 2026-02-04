@@ -5,7 +5,8 @@
 //! Propiedad fundamental: M†M = I₄₄₄ (unitariedad)
 
 use std::f64::consts::PI;
-use nalgebra::{DMatrix, Complex};
+use nalgebra::{DMatrix, Complex, ComplexField, Normed};
+use approx::assert_abs_diff_eq;
 
 const PHI: f64 = 1.6180339887498948482;
 const DIM: usize = 444;
@@ -38,8 +39,9 @@ impl MonsterMatrix444 {
         for i in 0..DIM {
             for j in (i+1)..DIM {
                 if (i + j) % 7 == 0 { // Patrón basado en 7 familias
+                    let exponent = -((i * j) % 13) as i32;
                     let val = Complex::new(
-                        PHI.powi(-((i*j) % 13) as i32),
+                        PHI.powi(exponent),
                         0.0
                     ) * 0.01; // Pequeña contribución
                     data[(i, j)] = val;
@@ -50,7 +52,7 @@ impl MonsterMatrix444 {
         
         // Normalizar para asegurar unitariedad
         let norm = data.norm();
-        data = data / norm;
+        data = data.unscale(norm);
         
         let trace = data.trace();
         
@@ -60,9 +62,7 @@ impl MonsterMatrix444 {
     /// Aplica la matriz a un vector de estado consciente
     pub fn apply(&self, state: &[Complex<f64>]) -> Vec<Complex<f64>> {
         assert_eq!(state.len(), DIM);
-        let input = DMatrix::from_column_iterator(
-            DIM, 1, state.iter().cloned()
-        );
+        let input = DMatrix::from_vec(DIM, 1, state.to_vec());
         let output = &self.data * input;
         output.column(0).iter().cloned().collect()
     }
@@ -96,7 +96,6 @@ impl MonsterMatrix444 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use approx::assert_abs_diff_eq;
     
     #[test]
     fn test_trace_approx_196884() {
