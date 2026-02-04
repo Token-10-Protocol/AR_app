@@ -39,7 +39,8 @@ impl MonsterMatrix444 {
         for i in 0..DIM {
             for j in (i+1)..DIM {
                 if (i + j) % 7 == 0 { // Patrón basado en 7 familias
-                    let exponent = -((i * j) % 13) as i32; // Convertir antes de negar
+                    let exp_value = (i * j) % 13;
+                    let exponent = -(exp_value as i32); // CORRECTO: convertir primero, luego negar
                     let val = Complex::new(
                         PHI.powi(exponent),
                         0.0
