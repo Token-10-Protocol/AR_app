@@ -2,7 +2,7 @@
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
 
-use nalgebra::{DMatrix, Complex, DVector};
+use nalgebra::{DMatrix, Complex, DVector, Normed};
 use crate::matrix_444::{DIM, PHI};
 use crate::algebra_griess::{GriessAlgebra, GRIESS_DIM};
 
