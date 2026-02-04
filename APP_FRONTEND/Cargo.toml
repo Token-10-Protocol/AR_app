@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-algebra_rose_core = { path = "../CORE" }
-algebra_rose_interface = { path = "../INTERFACE" }
+algebra_rose_core = { path = "../CORE", version = "0.1.0" }
+nalgebra = "0.32"

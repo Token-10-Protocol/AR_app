@@ -7,7 +7,7 @@ name = "algebra_rose_app"
 version = "0.1.0"
 dependencies = [
  "algebra_rose_core",
- "algebra_rose_interface",
+ "nalgebra",
 ]
 
 [[package]]
