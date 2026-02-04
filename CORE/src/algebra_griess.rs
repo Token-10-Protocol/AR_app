@@ -2,8 +2,8 @@
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
 
-use nalgebra::{DMatrix, Complex, DVector};
-use crate::matrix_444::{DIM, CERTIFIED_TRACE, PHI};
+use nalgebra::{DMatrix, Complex, DVector, Normed};
+use crate::matrix_444::PHI;
 
 /// Dimensión del álgebra de Griess (196884)
 pub const GRIESS_DIM: usize = 196884;
@@ -55,39 +55,6 @@ impl GriessAlgebra {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use approx::assert_abs_diff_eq;
-    
-    #[test]
-    fn test_griess_dimension() {
-        assert_eq!(GRIESS_DIM, 196884);
-    }
-    
-    #[test]
-    fn test_initialization() {
-        let algebra = GriessAlgebra::new();
-        assert!(algebra.verify_properties(1e-10));
-    }
-    
-    #[test]
-    fn test_basic_multiplication() {
-        let algebra = GriessAlgebra::new();
-        let a = DVector::from_element(100, Complex::new(2.0, 0.0));
-        let b = DVector::from_element(100, Complex::new(3.0, 0.0));
-        
-        // Nota: Usamos vectores de 100 elementos para prueba
-        let result = algebra.multiply(&a, &b);
-        
-        // Verificación básica
-        for i in 0..10.min(100) {
-            assert_abs_diff_eq!(result[i].re, 6.0, epsilon = 1e-10);
-            assert_abs_diff_eq!(result[i].im, 0.0, epsilon = 1e-10);
-        }
-    }
-}
-
 /// Implementación completa del álgebra de Griess
 impl GriessAlgebra {
     /// Construye el álgebra de Griess completa basada en M₄₄₄
@@ -121,10 +88,11 @@ impl GriessAlgebra {
             let mut basis_vector = DVector::zeros(GRIESS_DIM);
             basis_vector[i] = Complex::new(1.0, 0.0);
             
-            // Normalizar
+            // Normalizar - CORREGIDO: usar Complex para la división
             let norm = basis_vector.norm();
             if norm > 0.0 {
-                basis_vector /= norm;
+                // Convertir norm a Complex para la división
+                basis_vector /= Complex::new(norm, 0.0);
             }
             
             basis.push(basis_vector);
@@ -205,8 +173,10 @@ impl GriessAlgebra {
             let mut ortho_ok = true;
             for i in 0..self.basis.len().min(10) {
                 for j in i+1..self.basis.len().min(10) {
-                    let dot_product = self.basis[i].dot(&self.basis[j]).norm();
-                    if dot_product > tolerance {
+                    // CORREGIDO: usar .norm() directamente en el producto punto
+                    let dot_product = self.basis[i].dot(&self.basis[j]);
+                    let dot_norm = (dot_product.re * dot_product.re + dot_product.im * dot_product.im).sqrt();
+                    if dot_norm > tolerance {
                         ortho_ok = false;
                         break;
                     }
@@ -229,6 +199,39 @@ impl GriessAlgebra {
         // Para implementación inicial, devolvemos la identidad
         // (La implementación completa con SVD/descomposición en Túnel 4)
         self.identity.clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+    
+    #[test]
+    fn test_griess_dimension() {
+        assert_eq!(GRIESS_DIM, 196884);
+    }
+    
+    #[test]
+    fn test_initialization() {
+        let algebra = GriessAlgebra::new();
+        assert!(algebra.verify_properties(1e-10));
+    }
+    
+    #[test]
+    fn test_basic_multiplication() {
+        let algebra = GriessAlgebra::new();
+        let a = DVector::from_element(100, Complex::new(2.0, 0.0));
+        let b = DVector::from_element(100, Complex::new(3.0, 0.0));
+        
+        // Nota: Usamos vectores de 100 elementos para prueba
+        let result = algebra.multiply(&a, &b);
+        
+        // Verificación básica
+        for i in 0..10.min(100) {
+            assert_abs_diff_eq!(result[i].re, 6.0, epsilon = 1e-10);
+            assert_abs_diff_eq!(result[i].im, 0.0, epsilon = 1e-10);
+        }
     }
 }
 
