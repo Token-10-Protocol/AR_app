@@ -316,10 +316,14 @@ mod tests {
             system.get_current_keygen(), 
             INITIAL_KEYGEN, 
             epsilon = 1e-12,
-            "z(0) debe ser exactamente 196883/196884"
+        assert_abs_diff_eq!(
+            system.get_current_keygen(), 
+            INITIAL_KEYGEN, 
+            epsilon = 1e-12
+        if (system.get_current_keygen() - INITIAL_KEYGEN).abs() > 1e-12 {
+            panic!("z(0) debe ser exactamente 196883/196884");
+        }
         );
-        
-        // Verificar iteración 0
         assert_eq!(system.get_iteration(), 0);
         
         // Verificar campo inicial (campo 1: 3D)
@@ -346,8 +350,10 @@ mod tests {
         
         // Verificar que coincide exactamente
         assert_abs_diff_eq!(
-            actual_z1, expected_z1, epsilon = 1e-12,
-            "z(1) debe cumplir ecuación exacta"
+        if (actual_z1 - expected_z1).abs() > 1e-12 {
+            panic!("z(1) debe cumplir ecuación exacta");
+        }
+            actual_z1, expected_z1, epsilon = 1e-12
         );
         
         println!("✅ Ecuación exacta verificada:");
