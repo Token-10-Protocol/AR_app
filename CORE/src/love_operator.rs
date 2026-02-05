@@ -97,7 +97,7 @@ impl LoveOperator {
         // 1. Unitariedad aproximada (Â⁺Â ≈ I)
         let adjoint = self.transformation.adjoint();
         let product = &adjoint * &self.transformation;
-        let identity_diff = (product - DMatrix::identity(DIM, DIM)).norm();
+        let identity_diff = (product - DMatrix::identity(DIM, DIM)).norm_sqr();
         results.push((
             "Unitariedad aproximada".to_string(),
             identity_diff < tolerance
@@ -202,7 +202,7 @@ mod tests {
         let transformed = operator.apply(&state);
         assert_eq!(transformed.len(), DIM);
         // Verificar que no es idéntico (transformación ocurrió)
-        let diff = (transformed - state).norm();
+        let diff = (transformed - state).norm_sqr();
         assert!(diff > 0.0, "Transformación debe cambiar el estado");
     }
 
@@ -217,7 +217,7 @@ mod tests {
         });
         let factor = operator.love_factor(&state_a, &state_b);
         // El factor de amor debe ser un número complejo no-cero
-        assert!(factor.norm() > 0.0, "Factor de amor debe ser no-cero");
+        assert!(factor.norm_sqr() > 0.0, "Factor de amor debe ser no-cero");
         println!("Factor de amor: {:.4} + {:.4}i", factor.re, factor.im);
     }
 
