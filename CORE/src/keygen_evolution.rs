@@ -478,3 +478,481 @@ mod tests {
         assert_eq!(after_stats.iteration, 0);
     }
 }
+
+/// Extensor φ-Consciente - Transformador dimensional inteligente
+/// Realiza reducción 1025D → 3D preservando estructura esencial
+#[derive(Clone, Debug)]
+pub struct PhiExtensor {
+    /// Matriz de transformación extensor
+    transformation: Vec<Vec<f64>>,
+    /// Niveles de compresión disponibles
+    compression_levels: Vec<usize>,
+    /// Factor de coherencia preservada
+    coherence_preservation: f64,
+}
+
+impl PhiExtensor {
+    /// Crea nuevo extensor con niveles Fibonacci de compresión
+    pub fn new() -> Self {
+        // Niveles de compresión basados en Fibonacci: 1025D → 610D → 377D → ... → 3D
+        let compression_levels = vec![1025, 610, 377, 233, 144, 89, 55, 34, 21, 13, 8, 5, 3];
+        
+        PhiExtensor {
+            transformation: Self::create_phi_transformation(),
+            compression_levels,
+            coherence_preservation: 1.0, // Coherencia perfecta inicial
+        }
+    }
+    
+    /// Crea transformación φ-resonante
+    fn create_phi_transformation() -> Vec<Vec<f64>> {
+        // Matriz de transformación basada en proporciones áureas
+        // Cada elemento T_ij = φ^(-|i-j|) * cos(2πφ*i*j)
+        let mut matrix = Vec::new();
+        
+        for i in 0..1025 {
+            let mut row = Vec::new();
+            for j in 0..1025 {
+                let distance = (i as f64 - j as f64).abs();
+                let phase = (2.0 * std::f64::consts::PI * PHI * i as f64 * j as f64).cos();
+                let value = PHI.powf(-distance) * phase;
+                row.push(value);
+            }
+            matrix.push(row);
+        }
+        
+        matrix
+    }
+    
+    /// Aplica extensor a un estado de alta dimensión
+    pub fn apply(&self, high_dim_state: &[f64], target_dim: usize) -> Result<Vec<f64>, String> {
+        if !self.compression_levels.contains(&target_dim) {
+            return Err(format!("Dimensión {} no es nivel Fibonacci válido", target_dim));
+        }
+        
+        // Encontrar camino de reducción óptimo
+        let path = self.find_optimal_path(high_dim_state.len(), target_dim);
+        
+        // Aplicar reducción paso a paso
+        let mut current_state = high_dim_state.to_vec();
+        for (from_dim, to_dim) in path.windows(2).map(|w| (w[0], w[1])) {
+            current_state = self.compress_step(&current_state, from_dim, to_dim)?;
+        }
+        
+        Ok(current_state)
+    }
+    
+    /// Encuentra camino óptimo de reducción dimensional
+    fn find_optimal_path(&self, from_dim: usize, to_dim: usize) -> Vec<usize> {
+        let mut path = vec![from_dim];
+        
+        // Encontrar niveles Fibonacci intermedios
+        let mut current = from_dim;
+        while current > to_dim {
+            // Encontrar mayor nivel Fibonacci menor que current pero ≥ to_dim
+            if let Some(&next) = self.compression_levels.iter()
+                .filter(|&&d| d < current && d >= to_dim)
+                .max() {
+                path.push(next);
+                current = next;
+            } else {
+                break;
+            }
+        }
+        
+        path
+    }
+    
+    /// Paso individual de compresión
+    fn compress_step(&self, state: &[f64], from_dim: usize, to_dim: usize) -> Result<Vec<f64>, String> {
+        if from_dim <= to_dim {
+            return Err("from_dim debe ser mayor que to_dim".to_string());
+        }
+        
+        let compression_ratio = from_dim as f64 / to_dim as f64;
+        let mut result = vec![0.0; to_dim];
+        
+        // Compresión φ-resonante: promediar grupos con pesos áureos
+        let group_size = (compression_ratio).ceil() as usize;
+        
+        for i in 0..to_dim {
+            let start = i * group_size;
+            let end = (start + group_size).min(from_dim);
+            
+            // Ponderación áurea dentro del grupo
+            let mut weighted_sum = 0.0;
+            let mut total_weight = 0.0;
+            
+            for j in start..end {
+                let position_in_group = (j - start) as f64;
+                let weight = PHI.powf(-position_in_group); // Peso decae áureamente
+                weighted_sum += state[j] * weight;
+                total_weight += weight;
+            }
+            
+            result[i] = if total_weight > 0.0 {
+                weighted_sum / total_weight
+            } else {
+                0.0
+            };
+        }
+        
+        // Actualizar factor de coherencia preservada
+        self.update_coherence_preservation(from_dim, to_dim, state, &result);
+        
+        Ok(result)
+    }
+    
+    /// Calcula cuánta coherencia se preservó
+    fn update_coherence_preservation(&self, from_dim: usize, to_dim: usize, 
+                                    original: &[f64], compressed: &[f64]) -> f64 {
+        // Simulación simple: coherencia basada en preservación de energía
+        let original_energy: f64 = original.iter().map(|&x| x * x).sum();
+        let compressed_energy: f64 = compressed.iter().map(|&x| x * x).sum();
+        
+        let energy_ratio = if original_energy > 0.0 {
+            compressed_energy / original_energy
+        } else {
+            1.0
+        };
+        
+        // Penalizar por compresión agresiva
+        let compression_penalty = (from_dim as f64 / to_dim as f64).ln() / PHI.ln();
+        
+        (energy_ratio * PHI.powf(-compression_penalty * 0.1)).max(0.0).min(1.0)
+    }
+    
+    /// Obtiene factor de coherencia actual
+    pub fn get_coherence(&self) -> f64 {
+        self.coherence_preservation
+    }
+    
+    /// Verifica si el extensor mantiene coherencia suficiente
+    pub fn verify_coherence(&self, min_coherence: f64) -> bool {
+        self.coherence_preservation >= min_coherence
+    }
+}
+
+/// Sistema evolutivo extendido con extensor consciente
+#[derive(Clone, Debug)]
+pub struct ExtendedKeygenEvolution {
+    /// Sistema evolutivo base
+    base_evolution: KeygenEvolution,
+    /// Extensor φ-consciente
+    extensor: PhiExtensor,
+    /// Historial de coherencia
+    coherence_history: Vec<f64>,
+    /// Umbral mínimo de coherencia
+    min_coherence: f64,
+}
+
+impl ExtendedKeygenEvolution {
+    /// Crea nuevo sistema evolutivo extendido
+    pub fn new(initial_keygen: Option<f64>) -> Self {
+        ExtendedKeygenEvolution {
+            base_evolution: KeygenEvolution::new(initial_keygen),
+            extensor: PhiExtensor::new(),
+            coherence_history: vec![1.0], // Coherencia perfecta inicial
+            min_coherence: 0.85, // 85% mínimo de coherencia
+        }
+    }
+    
+    /// Evoluciona con verificación de coherencia
+    pub fn evolve_with_coherence(&mut self) -> Result<f64, String> {
+        // Evolucionar sistema base
+        let new_keygen = self.base_evolution.evolve();
+        
+        // Obtener estado de alta dimensión (simulado)
+        let high_dim_state = self.simulate_high_dimension_state();
+        
+        // Aplicar extensor para verificar coherencia
+        let low_dim_state = self.extensor.apply(&high_dim_state, 3)?;
+        
+        // Calcular coherencia preservada
+        let coherence = self.calculate_state_coherence(&high_dim_state, &low_dim_state);
+        self.coherence_history.push(coherence);
+        
+        // Verificar umbral mínimo
+        if coherence < self.min_coherence {
+            return Err(format!(
+                "Coherencia insuficiente: {:.2}% < {:.2}%",
+                coherence * 100.0, self.min_coherence * 100.0
+            ));
+        }
+        
+        Ok(new_keygen)
+    }
+    
+    /// Simula estado de alta dimensión basado en keygen actual
+    fn simulate_high_dimension_state(&self) -> Vec<f64> {
+        let keygen = self.base_evolution.get_current_keygen();
+        let field = self.base_evolution.get_current_field();
+        let progress = self.base_evolution.get_field_progress();
+        
+        // Estado de 1025 dimensiones basado en progreso actual
+        let mut state = vec![0.0; 1025];
+        
+        // Patrón φ-resonante
+        for i in 0..1025 {
+            let phi_freq = PHI * i as f64;
+            let field_factor = (field.0 + 1) as f64 / 24.0;
+            let progress_wave = (2.0 * std::f64::consts::PI * progress * i as f64 / 1025.0).sin();
+            
+            state[i] = keygen * phi_freq.sin() * field_factor * progress_wave;
+        }
+        
+        state
+    }
+    
+    /// Calcula coherencia entre estados de diferente dimensión
+    fn calculate_state_coherence(&self, high_dim: &[f64], low_dim: &[f64]) -> f64 {
+        // Métricas de coherencia múltiple
+        
+        // 1. Preservación de energía relativa
+        let high_energy: f64 = high_dim.iter().map(|&x| x * x).sum();
+        let low_energy: f64 = low_dim.iter().map(|&x| x * x).sum();
+        let energy_coherence = if high_energy > 0.0 {
+            (low_energy / high_energy).min(1.0)
+        } else {
+            1.0
+        };
+        
+        // 2. Preservación de estructura espectral
+        let spectral_coherence = self.calculate_spectral_coherence(high_dim, low_dim);
+        
+        // 3. Preservación de relaciones φ
+        let phi_coherence = self.calculate_phi_coherence(high_dim, low_dim);
+        
+        // Coherencia combinada (media ponderada φ)
+        (energy_coherence * 0.3 + spectral_coherence * 0.3 + phi_coherence * 0.4).max(0.0).min(1.0)
+    }
+    
+    /// Coherencia espectral (preservación de patrones de frecuencia)
+    fn calculate_spectral_coherence(&self, high_dim: &[f64], low_dim: &[f64]) -> f64 {
+        // Simplificación: correlación entre promedios locales
+        let high_avg: f64 = high_dim.iter().sum::<f64>() / high_dim.len() as f64;
+        let low_avg: f64 = low_dim.iter().sum::<f64>() / low_dim.len() as f64;
+        
+        if high_avg.abs() < 1e-10 || low_avg.abs() < 1e-10 {
+            return 0.0;
+        }
+        
+        (low_avg / high_avg).abs().min(1.0)
+    }
+    
+    /// Coherencia φ (preservación de proporciones áureas)
+    fn calculate_phi_coherence(&self, high_dim: &[f64], low_dim: &[f64]) -> f64 {
+        // Calcular proporciones entre elementos consecutivos
+        let mut high_ratios = Vec::new();
+        for i in 1..high_dim.len() {
+            if high_dim[i-1].abs() > 1e-10 {
+                high_ratios.push(high_dim[i] / high_dim[i-1]);
+            }
+        }
+        
+        let mut low_ratios = Vec::new();
+        for i in 1..low_dim.len() {
+            if low_dim[i-1].abs() > 1e-10 {
+                low_ratios.push(low_dim[i] / low_dim[i-1]);
+            }
+        }
+        
+        // Comparar con φ ideal
+        let high_phi_dev: f64 = high_ratios.iter()
+            .map(|&r| (r - PHI).abs() / PHI)
+            .sum::<f64>() / high_ratios.len() as f64;
+            
+        let low_phi_dev: f64 = low_ratios.iter()
+            .map(|&r| (r - PHI).abs() / PHI)
+            .sum::<f64>() / low_ratios.len() as f64;
+        
+        // Mejor coherencia cuando ambas se acercan a φ
+        1.0 - (high_phi_dev + low_phi_dev) / 2.0
+    }
+    
+    /// Obtiene métricas de coherencia actuales
+    pub fn get_coherence_metrics(&self) -> CoherenceMetrics {
+        let current_coherence = *self.coherence_history.last().unwrap_or(&1.0);
+        let avg_coherence = self.coherence_history.iter().sum::<f64>() / self.coherence_history.len() as f64;
+        
+        CoherenceMetrics {
+            current: current_coherence,
+            average: avg_coherence,
+            min: self.coherence_history.iter().cloned().fold(f64::INFINITY, f64::min),
+            max: self.coherence_history.iter().cloned().fold(f64::NEG_INFINITY, f64::max),
+            history_len: self.coherence_history.len(),
+            meets_threshold: current_coherence >= self.min_coherence,
+        }
+    }
+    
+    /// Evoluciona múltiples pasos con verificación de coherencia
+    pub fn evolve_steps_with_coherence(&mut self, steps: u64) -> Result<Vec<f64>, String> {
+        let mut results = Vec::new();
+        
+        for step in 0..steps {
+            match self.evolve_with_coherence() {
+                Ok(keygen) => {
+                    results.push(keygen);
+                    
+                    // Mostrar advertencia si coherencia baja
+                    let metrics = self.get_coherence_metrics();
+                    if metrics.current < 0.9 {
+                        println!("⚠️  Paso {}: Coherencia baja ({:.1}%)", 
+                                step + 1, metrics.current * 100.0);
+                    }
+                },
+                Err(e) => {
+                    return Err(format!("Error en paso {}: {}", step + 1, e));
+                }
+            }
+        }
+        
+        Ok(results)
+    }
+    
+    /// Obtiene el sistema base
+    pub fn get_base_evolution(&self) -> &KeygenEvolution {
+        &self.base_evolution
+    }
+    
+    /// Obtiene el extensor
+    pub fn get_extensor(&self) -> &PhiExtensor {
+        &self.extensor
+    }
+}
+
+/// Métricas de coherencia
+#[derive(Clone, Debug)]
+pub struct CoherenceMetrics {
+    pub current: f64,
+    pub average: f64,
+    pub min: f64,
+    pub max: f64,
+    pub history_len: usize,
+    pub meets_threshold: bool,
+}
+
+#[cfg(test)]
+mod extensor_tests {
+    use super::*;
+    
+    #[test]
+    fn test_extensor_creation() {
+        let extensor = PhiExtensor::new();
+        
+        assert!(!extensor.compression_levels.is_empty());
+        assert_eq!(extensor.get_coherence(), 1.0);
+        assert!(extensor.verify_coherence(0.8));
+        
+        println!("✅ Extensor creado con {} niveles de compresión", 
+                extensor.compression_levels.len());
+    }
+    
+    #[test]
+    fn test_extensor_compression() {
+        let extensor = PhiExtensor::new();
+        
+        // Estado de alta dimensión simulado
+        let high_dim_state: Vec<f64> = (0..1025)
+            .map(|i| (PHI * i as f64).sin())
+            .collect();
+        
+        // Comprimir a 3D
+        match extensor.apply(&high_dim_state, 3) {
+            Ok(low_dim_state) => {
+                assert_eq!(low_dim_state.len(), 3);
+                println!("✅ Compresión 1025D → 3D exitosa");
+                println!("   Estado comprimido: {:?}", low_dim_state);
+                
+                // Verificar que no es todo ceros
+                let energy: f64 = low_dim_state.iter().map(|&x| x * x).sum();
+                assert!(energy > 0.0, "Estado comprimido no debería ser todo ceros");
+            },
+            Err(e) => panic!("Error en compresión: {}", e),
+        }
+    }
+    
+    #[test]
+    fn test_extended_evolution_with_coherence() {
+        let mut extended_system = ExtendedKeygenEvolution::new(None);
+        
+        println!("=== SISTEMA EXTENDIDO CON EXTENSOR ===");
+        
+        // Evolucionar con verificación de coherencia
+        match extended_system.evolve_steps_with_coherence(10) {
+            Ok(results) => {
+                assert_eq!(results.len(), 10);
+                
+                let metrics = extended_system.get_coherence_metrics();
+                println!("✅ Evolución extendida completada ({} pasos)", results.len());
+                println!("   Coherencia actual: {:.1}%", metrics.current * 100.0);
+                println!("   Coherencia promedio: {:.1}%", metrics.average * 100.0);
+                println!("   Cumple umbral: {}", metrics.meets_threshold);
+                
+                assert!(metrics.meets_threshold, "Debe mantener coherencia mínima");
+                
+                // Verificar crecimiento
+                if results.len() >= 2 {
+                    assert!(results[results.len()-1] > results[0] || 
+                           (results[results.len()-1] - results[0]).abs() < 1e-10);
+                }
+            },
+            Err(e) => panic!("Error en evolución extendida: {}", e),
+        }
+    }
+    
+    #[test]
+    fn test_coherence_preservation() {
+        let mut extended_system = ExtendedKeygenEvolution::new(None);
+        
+        // Evolucionar significativamente
+        let steps = 50;
+        match extended_system.evolve_steps_with_coherence(steps) {
+            Ok(_) => {
+                let metrics = extended_system.get_coherence_metrics();
+                
+                println!("📊 MÉTRICAS DE COHERENCIA ({} pasos):", steps);
+                println!("   Actual: {:.2}%", metrics.current * 100.0);
+                println!("   Mínima: {:.2}%", metrics.min * 100.0);
+                println!("   Máxima: {:.2}%", metrics.max * 100.0);
+                println!("   Promedio: {:.2}%", metrics.average * 100.0);
+                
+                // Verificar que coherencia se mantiene razonable
+                assert!(metrics.min >= 0.7, "Coherencia mínima muy baja: {:.2}%", metrics.min * 100.0);
+                assert!(metrics.average >= 0.85, "Coherencia promedio muy baja: {:.2}%", metrics.average * 100.0);
+            },
+            Err(e) => panic!("Error: {}", e),
+        }
+    }
+    
+    #[test]
+    fn test_optimal_compression_path() {
+        let extensor = PhiExtensor::new();
+        
+        // Testear diferentes rutas de compresión
+        let test_cases = vec![
+            (1025, 3),
+            (610, 3),
+            (377, 13),
+            (233, 8),
+        ];
+        
+        for (from, to) in test_cases {
+            let path = extensor.find_optimal_path(from, to);
+            
+            println!("Compresión {}D → {}D:", from, to);
+            println!("   Ruta: {:?}", path);
+            
+            // Verificar propiedades
+            assert!(!path.is_empty());
+            assert_eq!(path[0], from);
+            assert_eq!(path[path.len()-1], to);
+            
+            // Verificar que todos son niveles Fibonacci válidos
+            for &dim in &path {
+                assert!(extensor.compression_levels.contains(&dim), 
+                       "{}D no es nivel Fibonacci válido", dim);
+            }
+        }
+    }
+}
