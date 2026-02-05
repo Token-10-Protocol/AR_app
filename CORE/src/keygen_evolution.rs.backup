@@ -246,15 +246,7 @@ mod tests {
     }
 
     #[test]
-    fn     #[test]
     fn test_single_evolution() {
-        let mut system = KeygenEvolution::new(Some(0.9)); // Valor inicial más bajo
-        let initial = system.get_current_keygen();
-        let next = system.evolve();
-        assert!(next > initial, "Keygen debe crecer: {} > {}", next, initial);
-        assert_eq!(system.get_iteration(), 1);
-        assert_eq!(system.get_history().len(), 2);
-    }
         let mut system = KeygenEvolution::new(None);
         let initial = system.get_current_keygen();
         let next = system.evolve();
@@ -264,19 +256,7 @@ mod tests {
     }
 
     #[test]
-    fn     #[test]
     fn test_multiple_evolutions() {
-        let mut system = KeygenEvolution::new(Some(0.9)); // Valor inicial más bajo
-        let results = system.evolve_steps(10);
-        assert_eq!(results.len(), 10);
-        assert_eq!(system.get_iteration(), 10);
-        assert_eq!(system.get_history().len(), 11);
-        for i in 1..results.len() {
-            assert!(results[i] > results[i-1],
-                "El crecimiento debe ser monótono en paso {}: {} > {}",
-                i, results[i], results[i-1]);
-        }
-    }
         let mut system = KeygenEvolution::new(None);
         let results = system.evolve_steps(10);
         assert_eq!(results.len(), 10);
@@ -317,16 +297,7 @@ mod tests {
     }
 
     #[test]
-    fn     #[test]
     fn test_growth_metrics() {
-        let mut system = KeygenEvolution::new(Some(0.9)); // Valor inicial más bajo
-        system.evolve_steps(5);
-        let rate = system.growth_rate();
-        let acceleration = system.growth_acceleration();
-        println!("Tasa crecimiento: {:.6}", rate);
-        println!("Aceleración: {:.6}", acceleration);
-        assert!(rate > 0.0);
-    }
         let mut system = KeygenEvolution::new(None);
         system.evolve_steps(5);
         let rate = system.growth_rate();
@@ -337,18 +308,7 @@ mod tests {
     }
 
     #[test]
-    fn     #[test]
     fn test_projection() {
-        let system = KeygenEvolution::new(Some(0.9)); // Valor inicial más bajo
-        let projection = system.project_future(20);
-        assert_eq!(projection.len(), 20);
-        for i in 1..projection.len() {
-            assert!(projection[i] > projection[i-1],
-                "Proyección debe crecer en paso {}: {} > {}",
-                i, projection[i], projection[i-1]);
-        }
-        println!("Proyección 20 pasos: {:?}", projection);
-    }
         let system = KeygenEvolution::new(None);
         let projection = system.project_future(20);
         assert_eq!(projection.len(), 20);
@@ -361,18 +321,7 @@ mod tests {
     }
 
     #[test]
-    fn     #[test]
     fn test_stats_generation() {
-        let mut system = KeygenEvolution::new(Some(0.9)); // Valor inicial más bajo
-        system.evolve_steps(15);
-        let stats = system.get_stats();
-        println!("Estadísticas: {:?}", stats);
-        assert!(stats.current_value > 0.9);
-        assert_eq!(stats.iteration, 15);
-        assert!(stats.active_fields > 0);
-        assert!(stats.growth_rate > 0.0);
-        assert!(stats.love_intensity > 0.0);
-    }
         let mut system = KeygenEvolution::new(None);
         system.evolve_steps(15);
         let stats = system.get_stats();
@@ -385,16 +334,7 @@ mod tests {
     }
 
     #[test]
-    fn     #[test]
     fn test_batch_evolution() {
-        let initials = vec![0.9, 0.95, 0.98]; // Valores iniciales más bajos
-        let results = batch_evolution(test_batch_evolution() {initials, 10);
-        assert_eq!(results.len(), 3);
-        for (i, evolution) in results.iter().enumerate() {
-            assert_eq!(evolution.len(), 10);
-            println!("Batch {}: primeros valores: {:?}", i, test_batch_evolution() {evolution[..3]);
-        }
-    }
         let initials = vec![INITIAL_KEYGEN, 0.999, 0.9995];
         let results = batch_evolution(&initials, 10);
         assert_eq!(results.len(), 3);
