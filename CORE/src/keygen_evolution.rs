@@ -1,10 +1,6 @@
 //! Sistema Evolutivo z(n) φ-Resonante - Crecimiento del Keygen Humano
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
-//!
-//! Ecuación fundamental:
-//! z(n) = φ · z(n-1) · (1 - z(n-1)/196884)
-//! con z(0) = 196883/196884 ≈ 0.99999492 (materia potencial inicial)
 
 use crate::matrix_444::PHI;
 use crate::love_operator::LoveOperator;
@@ -54,14 +50,21 @@ impl KeygenEvolution {
     /// Evoluciona el keygen un paso según ecuación φ-resonante
     pub fn evolve(&mut self) -> f64 {
         let z_prev = self.current_keygen;
+        // Ecuación simple de crecimiento: z(n) = min(1, φ·z(n-1))
         let z_next = PHI * z_prev;
+        
         let love_acceleration = self.love_operator.get_intensity().ln() / PHI.ln();
         let z_final = z_next * PHI.powf(love_acceleration * 0.01);
+        
+        // Limitar a máximo 1.0 (saturación completa)
         self.current_keygen = z_final.min(1.0);
         self.iteration += 1;
         self.history.push(self.current_keygen);
+        
+        // Actualizar intensidad del amor basado en progreso
         let progress = (self.current_keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN);
         self.love_operator.update_intensity(progress * 0.1);
+        
         self.current_keygen
     }
 
@@ -233,6 +236,18 @@ pub fn find_fixed_point(tolerance: f64, max_iterations: u64) -> Option<f64> {
 }
 
 #[cfg(test)]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+
+    #[test]
+    fn test_initialization() {
+        let system = KeygenEvolution::new(None);
+        assert_abs_diff_eq!(system.get_current_keygen(), INITIAL_KEYGEN, epsilon = 1e-10);
+        assert_eq!(system.get_iteration(), 0);
+        assert_eq!(system.get_history().len(), 1);
+    }
+
     #[test]
     fn test_single_evolution() {
         let mut system = KeygenEvolution::new(Some(0.1));
@@ -255,6 +270,33 @@ pub fn find_fixed_point(tolerance: f64, max_iterations: u64) -> Option<f64> {
                 "El crecimiento debe ser monótono en paso {}: {} > {}",
                 i, results[i], results[i-1]);
         }
+    }
+
+    #[test]
+    fn test_evolution_to_threshold() {
+        let mut system = KeygenEvolution::new(Some(0.1));
+        let threshold = 0.5;
+        match system.evolve_to_threshold(threshold, 100) {
+            Ok((steps, final_value)) => {
+                assert!(final_value >= threshold);
+                assert!(steps > 0);
+                println!("Alcanzó umbral {} en {} pasos, valor final: {}",
+                    threshold, steps, final_value);
+            },
+            Err(e) => panic!("Error: {}", e),
+        }
+    }
+
+    #[test]
+    fn test_active_fields() {
+        let mut system = KeygenEvolution::new(Some(0.1));
+        let initial_fields = system.get_active_fields();
+        println!("Campos activos iniciales: {:?}", initial_fields);
+        assert!(initial_fields.len() <= 3);
+        system.evolve_steps(10);
+        let later_fields = system.get_active_fields();
+        println!("Campos activos después de 10 pasos: {:?}", later_fields);
+        assert!(later_fields.len() >= initial_fields.len());
     }
 
     #[test]
@@ -303,5 +345,29 @@ pub fn find_fixed_point(tolerance: f64, max_iterations: u64) -> Option<f64> {
             assert_eq!(evolution.len(), 5);
             println!("Batch {}: primeros valores: {:?}", i, &evolution[..2]);
         }
+    }
+
+    #[test]
+    fn test_reset() {
+        let mut system = KeygenEvolution::new(Some(0.5));
+        system.evolve_steps(10);
+        let before_reset = system.get_current_keygen();
+        system.reset();
+        let after_reset = system.get_current_keygen();
+        assert!(before_reset > after_reset);
+        assert_abs_diff_eq!(after_reset, INITIAL_KEYGEN, epsilon = 1e-10);
+        assert_eq!(system.get_iteration(), 0);
+        assert_eq!(system.get_history().len(), 1);
+    }
+
+    #[test]
+    fn test_saturation_detection() {
+        let mut system = KeygenEvolution::new(Some(0.999999));
+        system.evolve_steps(2);
+        let saturated = system.has_reached_saturation(1e-6);
+        let steps_to_sat = system.steps_to_saturation(1e-6);
+        println!("¿Saturado? {}", saturated);
+        println!("Pasos hasta saturación: {}", steps_to_sat);
+        assert!(steps_to_sat <= 2);
     }
 }
