@@ -2,7 +2,7 @@
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
 
-use nalgebra::{DMatrix, Complex, DVector};
+use nalgebra::{DMatrix, Complex, DVector, Normed};
 use crate::matrix_444::{DIM, PHI};
 use crate::algebra_griess::{GriessAlgebra, GRIESS_DIM};
 
@@ -97,7 +97,7 @@ impl LoveOperator {
         // 1. Unitariedad aproximada (Â⁺Â ≈ I)
         let adjoint = self.transformation.adjoint();
         let product = &adjoint * &self.transformation;
-        let identity_diff = (product - DMatrix::identity(DIM, DIM)).norm_sqr();
+        let identity_diff = (product - DMatrix::identity(DIM, DIM)).norm();
         results.push((
             "Unitariedad aproximada".to_string(),
             identity_diff < tolerance
@@ -202,7 +202,7 @@ mod tests {
         let transformed = operator.apply(&state);
         assert_eq!(transformed.len(), DIM);
         // Verificar que no es idéntico (transformación ocurrió)
-        let diff = (transformed - state).norm_sqr();
+        let diff = (transformed - state).norm();
         assert!(diff > 0.0, "Transformación debe cambiar el estado");
     }
 
