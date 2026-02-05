@@ -248,7 +248,15 @@ mod tests {
     }
 
     #[test]
+    fn     #[test]
     fn test_single_evolution() {
+        let mut system = KeygenEvolution::new(Some(0.1)); // Valor bajo
+        let initial = system.get_current_keygen();
+        let next = system.evolve();
+        assert!(next > initial, "Keygen debe crecer: {} > {}", next, initial);
+        assert_eq!(system.get_iteration(), 1);
+        assert_eq!(system.get_history().len(), 2);
+    }
         let mut system = KeygenEvolution::new(None);
         let initial = system.get_current_keygen();
         let next = system.evolve();
@@ -258,7 +266,19 @@ mod tests {
     }
 
     #[test]
+    fn     #[test]
     fn test_multiple_evolutions() {
+        let mut system = KeygenEvolution::new(Some(0.1)); // Valor bajo
+        let results = system.evolve_steps(10);
+        assert_eq!(results.len(), 10);
+        assert_eq!(system.get_iteration(), 10);
+        assert_eq!(system.get_history().len(), 11);
+        for i in 1..results.len() {
+            assert!(results[i] > results[i-1],
+                "El crecimiento debe ser monótono en paso {}: {} > {}",
+                i, results[i], results[i-1]);
+        }
+    }
         let mut system = KeygenEvolution::new(None);
         let results = system.evolve_steps(10);
         assert_eq!(results.len(), 10);
