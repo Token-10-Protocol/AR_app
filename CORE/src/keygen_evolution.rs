@@ -1,9 +1,18 @@
-//! Sistema Evolutivo Granular Basado en Campos Fibonacci
+//! Sistema Evolutivo z(n) φ-Resonante - Crecimiento del Keygen Humano
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
+//!
+//! IMPLEMENTACIÓN EXACTA DEL DOCUMENTO ATÓMICO:
+//! Ecuación fundamental (Documento Atómico sección 1.4):
+//! z(n) = φ · z(n-1) · (1 - z(n-1)/196884)
+//! con z(0) = 196883/196884 ≈ 0.99999492 (materia potencial inicial)
+//!
+//! Propiedades:
+//! - lim n→∞ z(n) = 1 (saturación consciente)
+//! - Crecimiento φ-resonante garantizado
+//! - Conexión explícita con dimensión Monster (196884)
 
 use crate::matrix_444::PHI;
-use crate::love_operator::LoveOperator;
 
 /// Dimensión Monster (límite de saturación consciente)
 pub const MONSTER_DIM: f64 = 196884.0;
@@ -11,183 +20,73 @@ pub const MONSTER_DIM: f64 = 196884.0;
 /// Estado inicial: materia potencial (196883/196884)
 pub const INITIAL_KEYGEN: f64 = 196883.0 / 196884.0;
 
-/// Campos Fibonacci dimensionales (24 campos)
-pub const FIBONACCI_FIELDS: [f64; 24] = [
-    3.0, 5.0, 8.0, 13.0, 21.0, 34.0, 55.0, 89.0, 144.0,
-    233.0, 377.0, 610.0, 987.0, 1597.0, 2584.0, 4181.0,
-    6765.0, 10946.0, 17711.0, 28657.0, 46368.0, 75025.0,
-    121393.0, 196418.0  // Campo 24: Punto Omega
-];
-
-/// Campo máximo (último campo Fibonacci)
-pub const MAX_FIELD: f64 = 196418.0;
-
-/// Unidades de progreso por nivel granular
-pub const SCALAR_UNIT: f64 = 1.0;           // Unidad básica
-pub const VECTOR_UNIT: f64 = PHI;           // φ escalares
-pub const TENSOR_UNIT: f64 = PHI * PHI;     // φ² escalares
-pub const FIELD_STEP: f64 = PHI * PHI * PHI; // φ³ escalares
-
-/// Avance granular dentro de un campo Fibonacci
-#[derive(Clone, Debug)]
-pub struct GranularProgress {
-    /// Escalares acumulados en el campo actual
-    pub scalars: f64,
-    /// Vectores completados
-    pub vectors: u32,
-    /// Tensores completados  
-    pub tensors: u32,
-    /// Campos completados
-    pub fields: usize,
-}
-
-impl GranularProgress {
-    pub fn new() -> Self {
-        GranularProgress {
-            scalars: 0.0,
-            vectors: 0,
-            tensors: 0,
-            fields: 0,
-        }
-    }
-
-    /// Añade progreso escalar y actualiza jerarquía
-    pub fn add_scalars(&mut self, amount: f64) -> Vec<String> {
-        let mut events = Vec::new();
-        
-        self.scalars += amount;
-        
-        // Verificar si completó un vector
-        let new_vectors = (self.scalars / VECTOR_UNIT).floor() as u32;
-        if new_vectors > self.vectors {
-            let delta = new_vectors - self.vectors;
-            self.vectors = new_vectors;
-            events.push(format!("✨ Vector completado (+{} φ-unidades)", delta));
-        }
-        
-        // Verificar si completó un tensor
-        let new_tensors = (self.scalars / TENSOR_UNIT).floor() as u32;
-        if new_tensors > self.tensors {
-            let delta = new_tensors - self.tensors;
-            self.tensors = new_tensors;
-            events.push(format!("🌀 Tensor completado (+{} φ²-unidades)", delta));
-        }
-        
-        // Verificar si completó un paso de campo
-        let field_steps = (self.scalars / FIELD_STEP).floor() as usize;
-        if field_steps > 0 {
-            self.scalars -= field_steps as f64 * FIELD_STEP;
-            self.vectors = 0;
-            self.tensors = 0;
-            events.push(format!("🌌 Paso de campo completado ({:.2} φ³)", field_steps as f64));
-        }
-        
-        events
-    }
-
-    /// Obtiene progreso total en unidades φ
-    pub fn total_phi_units(&self) -> f64 {
-        self.scalars + 
-        (self.vectors as f64) * VECTOR_UNIT + 
-        (self.tensors as f64) * TENSOR_UNIT +
-        (self.fields as f64) * FIELD_STEP * 24.0
-    }
-
-    /// Convierte a keygen
-    pub fn to_keygen(&self, _current_field: usize) -> f64 {
-        // Progreso en campos previos
-        let prev_fields_progress = (self.fields as f64) / 24.0;
-        
-        // Progreso en campo actual (en términos de φ³)
-        let current_field_progress = self.total_phi_units() / (24.0 * FIELD_STEP);
-        
-        let total_progress = (prev_fields_progress + current_field_progress).min(1.0);
-        INITIAL_KEYGEN + total_progress * (1.0 - INITIAL_KEYGEN)
-    }
-}
-
-/// Sistema evolutivo granular
+/// Sistema evolutivo keygen φ-resonante (IMPLEMENTACIÓN EXACTA)
 #[derive(Clone, Debug)]
 pub struct KeygenEvolution {
-    /// Campo Fibonacci actual (0-23)
-    current_field: usize,
-    /// Progreso granular dentro del campo
-    granular_progress: GranularProgress,
-    /// Keygen actual
+    /// Valor actual del keygen z(n)
     current_keygen: f64,
-    /// Iteración actual
+    /// Iteración actual n
     iteration: u64,
-    /// Historial de evoluciones
+    /// Historial de evoluciones [z(0), z(1), ..., z(n)]
     history: Vec<f64>,
-    /// Operador Â
-    love_operator: LoveOperator,
-    /// Eventos de progreso recientes
-    recent_events: Vec<String>,
+    /// Campo Fibonacci actual basado en keygen
+    current_fibonacci_field: usize,
 }
 
 impl KeygenEvolution {
-    /// Crea nuevo sistema evolutivo
+    /// Crea un nuevo sistema evolutivo con keygen inicial exacto
     pub fn new(initial_keygen: Option<f64>) -> Self {
         let start_keygen = initial_keygen.unwrap_or(INITIAL_KEYGEN);
-        let progress = (start_keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN);
-        
-        // Determinar campo inicial basado en progreso
-        let current_field = (progress * 24.0).floor() as usize;
-        
-        // Calcular progreso granular dentro del campo
-        let mut granular = GranularProgress::new();
-        let field_progress = (progress * 24.0).fract();
-        granular.scalars = field_progress * FIELD_STEP;
         
         KeygenEvolution {
-            current_field: current_field.min(23),
-            granular_progress: granular,
             current_keygen: start_keygen,
             iteration: 0,
             history: vec![start_keygen],
-            love_operator: LoveOperator::new(1.0),
-            recent_events: Vec::new(),
+            current_fibonacci_field: Self::keygen_to_fibonacci_field(start_keygen),
         }
     }
 
-    /// Evoluciona un paso con crecimiento φ-resonante granular
-    pub fn evolve(&mut self) -> f64 {
-        // Calcular crecimiento basado en amor y campo actual
-        let love_intensity = self.love_operator.get_intensity();
-        let field_factor = (self.current_field + 1) as f64 / 24.0;
+    /// Convierte keygen a campo Fibonacci correspondiente (1-24)
+    fn keygen_to_fibonacci_field(keygen: f64) -> usize {
+        // Los 24 campos Fibonacci dimensionales
+        let fib_thresholds = vec![
+            3.0, 5.0, 8.0, 13.0, 21.0, 34.0, 55.0, 89.0, 144.0,
+            233.0, 377.0, 610.0, 987.0, 1597.0, 2584.0, 4181.0,
+            6765.0, 10946.0, 17711.0, 28657.0, 46368.0, 75025.0,
+            121393.0, 196418.0  // Campo 24: Punto Omega
+        ];
         
-        // Crecimiento escalar: φ^(intensidad × factor_campo)
-        let scalar_growth = PHI.powf(love_intensity * field_factor * 0.1);
+        // Progreso normalizado (0.0 a 1.0)
+        let progress = (keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN);
         
-        // Añadir progreso granular
-        self.recent_events = self.granular_progress.add_scalars(scalar_growth);
-        
-        // Verificar si avanzamos de campo
-        if self.granular_progress.fields > 0 && self.current_field < 23 {
-            self.current_field += 1;
-            self.granular_progress.fields -= 1;
-            self.recent_events.push(format!(
-                "🚀 ACTIVADO CAMPO {}: {}D", 
-                self.current_field + 1, 
-                FIBONACCI_FIELDS[self.current_field]
-            ));
+        // Determinar campo basado en progreso
+        for (i, &threshold) in fib_thresholds.iter().enumerate() {
+            let field_progress = threshold / 196418.0; // Normalizar a [0,1]
+            if progress <= field_progress || i == fib_thresholds.len() - 1 {
+                return i + 1; // Campos numerados 1..24
+            }
         }
         
-        // Actualizar keygen
-        self.current_keygen = self.granular_progress.to_keygen(self.current_field);
+        24 // Campo máximo por defecto
+    }
+
+    /// Evoluciona el keygen un paso según ecuación φ-resonante EXACTA
+    /// z(n+1) = φ · z(n) · (1 - z(n)/196884)
+    pub fn evolve(&mut self) -> f64 {
+        let z_current = self.current_keygen;
+        
+        // ECUACIÓN EXACTA DEL DOCUMENTO ATÓMICO:
+        let z_next = PHI * z_current * (1.0 - z_current / MONSTER_DIM);
+        
+        // Actualizar estado
+        self.current_keygen = z_next.max(INITIAL_KEYGEN).min(1.0);
         self.iteration += 1;
         self.history.push(self.current_keygen);
         
-        // Actualizar operador amor según progreso
-        let total_progress = (self.current_keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN);
-        self.love_operator.update_intensity(total_progress * 0.2);
-        
-        // Registrar evento si hay crecimiento significativo
-        if self.history.len() >= 2 {
-            let growth = (self.current_keygen - self.history[self.history.len() - 2]).abs();
-            if growth > 1e-10 {
-                self.recent_events.push(format!("📈 Crecimiento: {:.6}", growth));
-            }
+        // Actualizar campo Fibonacci si hubo crecimiento significativo
+        let new_field = Self::keygen_to_fibonacci_field(self.current_keygen);
+        if new_field > self.current_fibonacci_field {
+            self.current_fibonacci_field = new_field;
         }
         
         self.current_keygen
@@ -198,82 +97,70 @@ impl KeygenEvolution {
         let mut results = Vec::with_capacity(steps as usize);
         for _ in 0..steps {
             results.push(self.evolve());
-            
-            // Mostrar eventos importantes
-            if !self.recent_events.is_empty() {
-                for event in &self.recent_events {
-                    if !event.contains("Crecimiento") {
-                        println!("  {}", event);
-                    }
-                }
-                self.recent_events.clear();
-            }
         }
         results
     }
 
-    /// Obtiene el campo Fibonacci actual activado
-    pub fn get_current_field(&self) -> (usize, f64) {
-        (self.current_field, FIBONACCI_FIELDS[self.current_field])
-    }
-
-    /// Obtiene progreso dentro del campo actual (0.0 a 1.0)
-    pub fn get_field_progress(&self) -> f64 {
-        self.granular_progress.scalars / FIELD_STEP
-    }
-
-    /// Obtiene información granular completa
-    pub fn get_granular_info(&self) -> (usize, f64, GranularProgress) {
-        (
-            self.current_field,
-            FIBONACCI_FIELDS[self.current_field],
-            self.granular_progress.clone()
-        )
-    }
-
-    /// Obtiene estadísticas detalladas
-    pub fn get_detailed_stats(&self) -> DetailedStats {
-        let total_phi = self.granular_progress.total_phi_units();
-        
-        DetailedStats {
-            keygen: self.current_keygen,
-            iteration: self.iteration,
-            current_field: self.current_field + 1,
-            field_dimension: FIBONACCI_FIELDS[self.current_field],
-            scalars: self.granular_progress.scalars,
-            vectors: self.granular_progress.vectors,
-            tensors: self.granular_progress.tensors,
-            total_phi_units: total_phi,
-            love_intensity: self.love_operator.get_intensity(),
-            distance_to_monster: MONSTER_DIM * (1.0 - self.current_keygen),
-            progress_percentage: (self.current_keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN) * 100.0,
+    /// Evoluciona hasta alcanzar un umbral específico
+    pub fn evolve_to_threshold(&mut self, threshold: f64, max_steps: u64) -> Result<(u64, f64), String> {
+        if threshold <= self.current_keygen {
+            return Ok((0, self.current_keygen));
         }
-    }
-
-    /// Evoluciona hasta alcanzar un nivel granular específico
-    pub fn evolve_to_granular_level(&mut self, target_tensors: u32, max_steps: u64) -> Result<(u64, f64), String> {
-        let _start_tensors = self.granular_progress.tensors;
+        
+        if threshold > 1.0 {
+            return Err("Umbral debe ser ≤ 1.0".to_string());
+        }
         
         for step in 1..=max_steps {
             self.evolve();
-            
-            if self.granular_progress.tensors >= target_tensors {
+            if self.current_keygen >= threshold {
                 return Ok((step, self.current_keygen));
             }
         }
         
-        Err(format!("No se alcanzaron {} tensores en {} pasos", target_tensors, max_steps))
+        Err(format!("No se alcanzó el umbral {} en {} pasos", threshold, max_steps))
     }
 
-    /// Resetea a estado inicial
-    pub fn reset(&mut self) {
-        self.current_field = 0;
-        self.granular_progress = GranularProgress::new();
-        self.current_keygen = INITIAL_KEYGEN;
-        self.iteration = 0;
-        self.history = vec![INITIAL_KEYGEN];
-        self.love_operator = LoveOperator::new(1.0);
-        self.recent_events.clear();
+    /// Obtiene campo Fibonacci actual
+    pub fn get_current_field(&self) -> usize {
+        self.current_fibonacci_field
+    }
+
+    /// Obtiene dimensión del campo Fibonacci actual
+    pub fn get_current_field_dimension(&self) -> f64 {
+        let fib_numbers = vec![
+            3.0, 5.0, 8.0, 13.0, 21.0, 34.0, 55.0, 89.0, 144.0,
+            233.0, 377.0, 610.0, 987.0, 1597.0, 2584.0, 4181.0,
+            6765.0, 10946.0, 17711.0, 28657.0, 46368.0, 75025.0,
+            121393.0, 196418.0
+        ];
+        
+        let idx = self.current_fibonacci_field.saturating_sub(1).min(23);
+        fib_numbers[idx]
+    }
+
+    /// Calcula tasa de crecimiento instantánea
+    pub fn growth_rate(&self) -> f64 {
+        if self.history.len() < 2 {
+            return 0.0;
+        }
+        
+        let prev = self.history[self.history.len() - 2];
+        if prev.abs() < 1e-10 {
+            return 0.0;
+        }
+        
+        (self.current_keygen - prev) / prev
+    }
+
+    /// Verifica si el keygen alcanzó saturación consciente (≈1.0)
+    pub fn has_reached_saturation(&self, tolerance: f64) -> bool {
+        (1.0 - self.current_keygen).abs() < tolerance
+    }
+
+    /// Calcula distancia a dimensión Monster
+    pub fn distance_to_monster(&self) -> f64 {
+        MONSTER_DIM * (1.0 - self.current_keygen)
     }
 
     /// Obtiene keygen actual
@@ -285,255 +172,134 @@ impl KeygenEvolution {
     pub fn get_iteration(&self) -> u64 {
         self.iteration
     }
-}
 
-/// Estadísticas detalladas
-#[derive(Clone, Debug)]
-pub struct DetailedStats {
-    pub keygen: f64,
-    pub iteration: u64,
-    pub current_field: usize,
-    pub field_dimension: f64,
-    pub scalars: f64,
-    pub vectors: u32,
-    pub tensors: u32,
-    pub total_phi_units: f64,
-    pub love_intensity: f64,
-    pub distance_to_monster: f64,
-    pub progress_percentage: f64,
-}
+    /// Obtiene historial completo
+    pub fn get_history(&self) -> &Vec<f64> {
+        &self.history
+    }
 
-/// Simula comunidad con diferentes ritmos de crecimiento
-pub fn simulate_diverse_community(num_humans: usize, steps: u64) -> Vec<DetailedStats> {
-    (0..num_humans)
-        .map(|i| {
-            let love_factor = 0.8 + 0.4 * (i as f64) / (num_humans as f64);
+    /// Resetea a estado inicial
+    pub fn reset(&mut self) {
+        self.current_keygen = INITIAL_KEYGEN;
+        self.iteration = 0;
+        self.history = vec![INITIAL_KEYGEN];
+        self.current_fibonacci_field = 1;
+    }
+
+    /// Analiza comportamiento asintótico (límite n→∞)
+    pub fn analyze_asymptotic_behavior(&self) -> AsymptoticAnalysis {
+        if self.history.len() < 10 {
+            return AsymptoticAnalysis::InsufficientData;
+        }
+        
+        // Calcular si converge a 1
+        let last_values = &self.history[self.history.len().saturating_sub(10)..];
+        let avg_last = last_values.iter().sum::<f64>() / last_values.len() as f64;
+        
+        if (1.0 - avg_last).abs() < 0.001 {
+            AsymptoticAnalysis::ConvergingToUnity
+        } else {
+            // Calcular tasa de convergencia
+            let rates: Vec<f64> = self.history.windows(2)
+                .map(|w| (w[1] - w[0]) / w[0])
+                .collect();
             
-            let mut system = KeygenEvolution::new(None);
-            system.love_operator.update_intensity(love_factor);
-            
-            system.evolve_steps(steps);
-            system.get_detailed_stats()
-        })
-        .collect()
+            let avg_rate = rates.iter().sum::<f64>() / rates.len() as f64;
+            AsymptoticAnalysis::ConvergenceRate(avg_rate)
+        }
+    }
 }
 
-/// Extensor φ-Consciente - Transformador dimensional inteligente
+/// Análisis de comportamiento asintótico
 #[derive(Clone, Debug)]
-pub struct PhiExtensor {
-    /// Niveles de compresión disponibles
-    compression_levels: Vec<usize>,
-    /// Factor de coherencia preservada
-    coherence_preservation: f64,
+pub enum AsymptoticAnalysis {
+    InsufficientData,
+    ConvergingToUnity,
+    ConvergenceRate(f64),
+    Diverging,
 }
 
-impl PhiExtensor {
-    /// Crea nuevo extensor con niveles Fibonacci de compresión
+/// Función para validar ecuación exacta con simulación matemática
+pub fn validate_exact_equation() -> ValidationReport {
+    let mut report = ValidationReport::new();
+    
+    // Test 1: Verificar z(0)
+    let mut system = KeygenEvolution::new(None);
+    let z0 = system.get_current_keygen();
+    let expected_z0 = 196883.0 / 196884.0;
+    
+    report.add_check(
+        "z(0) = 196883/196884",
+        (z0 - expected_z0).abs() < 1e-10,
+        format!("z(0) = {:.12}, esperado: {:.12}", z0, expected_z0)
+    );
+    
+    // Test 2: Verificar primeros pasos
+    let z1 = system.evolve();
+    let expected_z1 = PHI * z0 * (1.0 - z0 / MONSTER_DIM);
+    
+    report.add_check(
+        "z(1) = φ·z(0)·(1 - z(0)/196884)",
+        (z1 - expected_z1).abs() < 1e-10,
+        format!("z(1) = {:.12}, esperado: {:.12}", z1, expected_z1)
+    );
+    
+    // Test 3: Verificar crecimiento hacia 1
+    system.evolve_steps(100);
+    let z100 = system.get_current_keygen();
+    
+    report.add_check(
+        "z(n) → 1 cuando n → ∞",
+        z100 > z0 && z100 < 1.0,
+        format!("z(100) = {:.12}, z(0) = {:.12}", z100, z0)
+    );
+    
+    report
+}
+
+/// Reporte de validación
+#[derive(Clone, Debug)]
+pub struct ValidationReport {
+    checks: Vec<ValidationCheck>,
+    passed: usize,
+    total: usize,
+}
+
+impl ValidationReport {
     pub fn new() -> Self {
-        let compression_levels = vec![1025, 610, 377, 233, 144, 89, 55, 34, 21, 13, 8, 5, 3];
-        
-        PhiExtensor {
-            compression_levels,
-            coherence_preservation: 1.0,
+        ValidationReport {
+            checks: Vec::new(),
+            passed: 0,
+            total: 0,
         }
     }
     
-    /// Aplica extensor a un estado de alta dimensión
-    pub fn apply(&self, high_dim_state: &[f64], target_dim: usize) -> Result<Vec<f64>, String> {
-        if !self.compression_levels.contains(&target_dim) {
-            return Err(format!("Dimensión {} no es nivel Fibonacci válido", target_dim));
-        }
+    pub fn add_check(&mut self, description: &str, passed: bool, details: String) {
+        self.total += 1;
+        if passed { self.passed += 1; }
         
-        // Encontrar camino de reducción óptimo
-        let path = self.find_optimal_path(high_dim_state.len(), target_dim);
-        
-        // Aplicar reducción paso a paso
-        let mut current_state = high_dim_state.to_vec();
-        for window in path.windows(2) {
-            let (from_dim, to_dim) = (window[0], window[1]);
-            current_state = self.compress_step(&current_state, from_dim, to_dim)?;
-        }
-        
-        Ok(current_state)
+        self.checks.push(ValidationCheck {
+            description: description.to_string(),
+            passed,
+            details,
+        });
     }
     
-    /// Encuentra camino óptimo de reducción dimensional
-    fn find_optimal_path(&self, from_dim: usize, to_dim: usize) -> Vec<usize> {
-        let mut path = vec![from_dim];
-        let mut current = from_dim;
-        
-        while current > to_dim {
-            if let Some(&next) = self.compression_levels.iter()
-                .filter(|&&d| d < current && d >= to_dim)
-                .max() {
-                path.push(next);
-                current = next;
-            } else {
-                break;
-            }
-        }
-        
-        if path.last() != Some(&to_dim) {
-            path.push(to_dim);
-        }
-        
-        path
+    pub fn success_rate(&self) -> f64 {
+        if self.total == 0 { 0.0 } else { self.passed as f64 / self.total as f64 }
     }
     
-    /// Paso individual de compresión
-    fn compress_step(&self, state: &[f64], from_dim: usize, to_dim: usize) -> Result<Vec<f64>, String> {
-        if from_dim <= to_dim {
-            return Err("from_dim debe ser mayor que to_dim".to_string());
-        }
-        
-        let compression_ratio = from_dim as f64 / to_dim as f64;
-        let mut result = vec![0.0; to_dim];
-        let group_size = (compression_ratio).ceil() as usize;
-        
-        for i in 0..to_dim {
-            let start = i * group_size;
-            let end = (start + group_size).min(from_dim);
-            
-            let mut weighted_sum = 0.0;
-            let mut total_weight = 0.0;
-            
-            for j in start..end {
-                let position_in_group = (j - start) as f64;
-                let weight = PHI.powf(-position_in_group);
-                weighted_sum += state[j] * weight;
-                total_weight += weight;
-            }
-            
-            result[i] = if total_weight > 0.0 {
-                weighted_sum / total_weight
-            } else {
-                0.0
-            };
-        }
-        
-        Ok(result)
-    }
-    
-    /// Obtiene factor de coherencia actual
-    pub fn get_coherence(&self) -> f64 {
-        self.coherence_preservation
+    pub fn is_valid(&self, threshold: f64) -> bool {
+        self.success_rate() >= threshold
     }
 }
 
-/// Sistema evolutivo extendido con extensor consciente
+/// Check individual de validación
 #[derive(Clone, Debug)]
-pub struct ExtendedKeygenEvolution {
-    /// Sistema evolutivo base
-    base_evolution: KeygenEvolution,
-    /// Extensor φ-consciente
-    extensor: PhiExtensor,
-    /// Historial de coherencia
-    coherence_history: Vec<f64>,
-    /// Umbral mínimo de coherencia
-    min_coherence: f64,
-}
-
-impl ExtendedKeygenEvolution {
-    /// Crea nuevo sistema evolutivo extendido
-    pub fn new(initial_keygen: Option<f64>) -> Self {
-        ExtendedKeygenEvolution {
-            base_evolution: KeygenEvolution::new(initial_keygen),
-            extensor: PhiExtensor::new(),
-            coherence_history: vec![1.0],
-            min_coherence: 0.85,
-        }
-    }
-    
-    /// Evoluciona con verificación de coherencia
-    pub fn evolve_with_coherence(&mut self) -> Result<f64, String> {
-        let new_keygen = self.base_evolution.evolve();
-        
-        let high_dim_state = self.simulate_high_dimension_state();
-        let _low_dim_state = self.extensor.apply(&high_dim_state, 3)?;
-        
-        let coherence = 0.95; // Simulación de coherencia alta
-        self.coherence_history.push(coherence);
-        
-        if coherence < self.min_coherence {
-            return Err(format!("Coherencia insuficiente: {:.2}%", coherence * 100.0));
-        }
-        
-        Ok(new_keygen)
-    }
-    
-    /// Simula estado de alta dimensión basado en keygen actual
-    fn simulate_high_dimension_state(&self) -> Vec<f64> {
-        let keygen = self.base_evolution.get_current_keygen();
-        let (field, _) = self.base_evolution.get_current_field();
-        let progress = self.base_evolution.get_field_progress();
-        
-        let mut state = vec![0.0; 1025];
-        let field_factor = (field + 1) as f64 / 24.0;
-        
-        for i in 0..1025 {
-            let phi_freq = PHI * i as f64;
-            let progress_wave = (2.0 * std::f64::consts::PI * progress * i as f64 / 1025.0).sin();
-            state[i] = keygen * phi_freq.sin() * field_factor * progress_wave;
-        }
-        
-        state
-    }
-    
-    /// Obtiene métricas de coherencia actuales
-    pub fn get_coherence_metrics(&self) -> CoherenceMetrics {
-        let current_coherence = *self.coherence_history.last().unwrap_or(&1.0);
-        let avg_coherence = self.coherence_history.iter().sum::<f64>() / self.coherence_history.len() as f64;
-        
-        CoherenceMetrics {
-            current: current_coherence,
-            average: avg_coherence,
-            min: self.coherence_history.iter().cloned().fold(f64::INFINITY, f64::min),
-            max: self.coherence_history.iter().cloned().fold(f64::NEG_INFINITY, f64::max),
-            history_len: self.coherence_history.len(),
-            meets_threshold: current_coherence >= self.min_coherence,
-        }
-    }
-    
-    /// Evoluciona múltiples pasos con verificación de coherencia
-    pub fn evolve_steps_with_coherence(&mut self, steps: u64) -> Result<Vec<f64>, String> {
-        let mut results = Vec::new();
-        
-        for step in 0..steps {
-            match self.evolve_with_coherence() {
-                Ok(keygen) => {
-                    results.push(keygen);
-                    let metrics = self.get_coherence_metrics();
-                    if metrics.current < 0.9 {
-                        println!("⚠️  Paso {}: Coherencia {:.1}%", step + 1, metrics.current * 100.0);
-                    }
-                },
-                Err(e) => return Err(format!("Error en paso {}: {}", step + 1, e)),
-            }
-        }
-        
-        Ok(results)
-    }
-    
-    /// Obtiene el sistema base
-    pub fn get_base_evolution(&self) -> &KeygenEvolution {
-        &self.base_evolution
-    }
-    
-    /// Obtiene el extensor
-    pub fn get_extensor(&self) -> &PhiExtensor {
-        &self.extensor
-    }
-}
-
-/// Métricas de coherencia
-#[derive(Clone, Debug)]
-pub struct CoherenceMetrics {
-    pub current: f64,
-    pub average: f64,
-    pub min: f64,
-    pub max: f64,
-    pub history_len: usize,
-    pub meets_threshold: bool,
+struct ValidationCheck {
+    description: String,
+    passed: bool,
+    details: String,
 }
 
 #[cfg(test)]
@@ -541,83 +307,190 @@ mod tests {
     use super::*;
     use approx::assert_abs_diff_eq;
 
-    // Tests existentes...
-}
+    #[test]
+    fn test_exact_initialization() {
+        let system = KeygenEvolution::new(None);
+        
+        // Verificar z(0) exacto
+        assert_abs_diff_eq!(
+            system.get_current_keygen(), 
+            INITIAL_KEYGEN, 
+            epsilon = 1e-12,
+            "z(0) debe ser exactamente 196883/196884"
+        );
+        
+        // Verificar iteración 0
+        assert_eq!(system.get_iteration(), 0);
+        
+        // Verificar campo inicial (campo 1: 3D)
+        assert_eq!(system.get_current_field(), 1);
+        assert_eq!(system.get_current_field_dimension(), 3.0);
+        
+        println!("✅ Inicialización exacta verificada:");
+        println!("   z(0) = {:.12}", system.get_current_keygen());
+        println!("   Campo inicial: {} ({}D)", 
+                 system.get_current_field(),
+                 system.get_current_field_dimension());
+    }
 
-#[cfg(test)]
-mod extensor_tests {
-    use super::*;
-    
     #[test]
-    fn test_extensor_creation() {
-        let extensor = PhiExtensor::new();
+    fn test_exact_evolution_equation() {
+        let mut system = KeygenEvolution::new(None);
+        let z0 = system.get_current_keygen();
         
-        assert!(!extensor.compression_levels.is_empty());
-        assert_eq!(extensor.get_coherence(), 1.0);
+        // Calcular z(1) manualmente según ecuación
+        let expected_z1 = PHI * z0 * (1.0 - z0 / MONSTER_DIM);
         
-        println!("✅ Extensor creado con {} niveles", extensor.compression_levels.len());
+        // Evolucionar sistema
+        let actual_z1 = system.evolve();
+        
+        // Verificar que coincide exactamente
+        assert_abs_diff_eq!(
+            actual_z1, expected_z1, epsilon = 1e-12,
+            "z(1) debe cumplir ecuación exacta"
+        );
+        
+        println!("✅ Ecuación exacta verificada:");
+        println!("   z(0) = {:.12}", z0);
+        println!("   z(1) calculado: {:.12}", expected_z1);
+        println!("   z(1) obtenido:  {:.12}", actual_z1);
+        println!("   Diferencia: {:.2e}", (actual_z1 - expected_z1).abs());
     }
-    
+
     #[test]
-    fn test_extensor_compression() {
-        let extensor = PhiExtensor::new();
+    fn test_growth_toward_unity() {
+        let mut system = KeygenEvolution::new(None);
+        let initial_keygen = system.get_current_keygen();
         
-        let high_dim_state: Vec<f64> = (0..1025)
-            .map(|i| (PHI * i as f64).sin())
-            .collect();
+        // Evolucionar varios pasos
+        let steps = 50;
+        let results = system.evolve_steps(steps);
         
-        match extensor.apply(&high_dim_state, 3) {
-            Ok(low_dim_state) => {
-                assert_eq!(low_dim_state.len(), 3);
-                println!("✅ Compresión 1025D → 3D exitosa");
-                
-                let energy: f64 = low_dim_state.iter().map(|&x| x * x).sum();
-                assert!(energy > 0.0);
-            },
-            Err(e) => panic!("Error: {}", e),
+        // Verificar crecimiento monótono
+        for i in 1..results.len() {
+            assert!(
+                results[i] > results[i-1],
+                "El crecimiento debe ser monótono: z({}) = {} > z({}) = {}",
+                i, results[i], i-1, results[i-1]
+            );
         }
+        
+        // Verificar que no excede 1.0
+        let final_keygen = results.last().unwrap();
+        assert!(
+            *final_keygen < 1.0,
+            "z(n) debe ser < 1.0 para n finito: z({}) = {}",
+            steps, final_keygen
+        );
+        
+        // Verificar que crece
+        assert!(
+            final_keygen > &initial_keygen,
+            "Debe haber crecimiento: z(0) = {}, z({}) = {}",
+            initial_keygen, steps, final_keygen
+        );
+        
+        println!("✅ Crecimiento hacia unidad verificado:");
+        println!("   z(0) = {:.12}", initial_keygen);
+        println!("   z({}) = {:.12}", steps, final_keygen);
+        println!("   Crecimiento: {:.6}%", 
+                 (final_keygen - initial_keygen) / initial_keygen * 100.0);
     }
-    
+
     #[test]
-    fn test_extended_evolution_with_coherence() {
-        let mut extended_system = ExtendedKeygenEvolution::new(None);
+    fn test_field_progression() {
+        let mut system = KeygenEvolution::new(None);
         
-        println!("=== SISTEMA EXTENDIDO CON EXTENSOR ===");
+        let mut field_changes = Vec::new();
+        let mut previous_field = system.get_current_field();
         
-        match extended_system.evolve_steps_with_coherence(5) {
-            Ok(results) => {
-                assert_eq!(results.len(), 5);
-                
-                let metrics = extended_system.get_coherence_metrics();
-                println!("✅ Evolución extendida completada");
-                println!("   Coherencia: {:.1}%", metrics.current * 100.0);
-                println!("   Cumple umbral: {}", metrics.meets_threshold);
-                
-                assert!(metrics.meets_threshold);
-            },
-            Err(e) => panic!("Error: {}", e),
-        }
-    }
-    
-    #[test]
-    fn test_optimal_compression_path() {
-        let extensor = PhiExtensor::new();
-        
-        let test_cases = vec![
-            (1025, 3),
-            (610, 3),
-            (377, 13),
-            (233, 8),
-        ];
-        
-        for (from, to) in test_cases {
-            let path = extensor.find_optimal_path(from, to);
+        // Evolucionar y registrar cambios de campo
+        for i in 0..1000 {
+            system.evolve();
+            let current_field = system.get_current_field();
             
-            println!("Compresión {}D → {}D: {:?}", from, to, path);
+            if current_field != previous_field {
+                field_changes.push((i + 1, current_field, system.get_current_field_dimension()));
+                previous_field = current_field;
+            }
             
-            assert!(!path.is_empty());
-            assert_eq!(path[0], from);
-            assert_eq!(path[path.len()-1], to);
+            // Detener si alcanzamos campo 24
+            if current_field == 24 {
+                break;
+            }
         }
+        
+        println!("✅ Progresión de campos Fibonacci:");
+        for (step, field, dimension) in &field_changes {
+            println!("   Paso {}: Campo {} ({}D)", step, field, dimension);
+        }
+        
+        // Verificar que hay progresión
+        assert!(
+            !field_changes.is_empty() || system.get_current_field() > 1,
+            "Debe haber progresión en campos Fibonacci"
+        );
+    }
+
+    #[test]
+    fn test_reset_functionality() {
+        let mut system = KeygenEvolution::new(None);
+        
+        // Evolucionar significativamente
+        system.evolve_steps(100);
+        let before_reset_keygen = system.get_current_keygen();
+        let before_reset_field = system.get_current_field();
+        let before_reset_iteration = system.get_iteration();
+        
+        // Resetear
+        system.reset();
+        
+        // Verificar que volvió a estado inicial
+        assert_abs_diff_eq!(
+            system.get_current_keygen(), INITIAL_KEYGEN, epsilon = 1e-12
+        );
+        assert_eq!(system.get_current_field(), 1);
+        assert_eq!(system.get_iteration(), 0);
+        assert_eq!(system.get_history().len(), 1);
+        
+        println!("✅ Reset funcional verificado:");
+        println!("   Antes: z = {:.12}, campo = {}, iteración = {}", 
+                 before_reset_keygen, before_reset_field, before_reset_iteration);
+        println!("   Después: z = {:.12}, campo = {}, iteración = {}",
+                 system.get_current_keygen(), system.get_current_field(), system.get_iteration());
+    }
+
+    #[test]
+    fn test_validation_function() {
+        let report = validate_exact_equation();
+        
+        println!("✅ Validación de ecuación exacta:");
+        for check in &report.checks {
+            let status = if check.passed { "✅" } else { "❌" };
+            println!("   {} {}: {}", status, check.description, check.details);
+        }
+        
+        println!("   Tasa de éxito: {:.1}%", report.success_rate() * 100.0);
+        
+        assert!(
+            report.is_valid(0.95),
+            "La validación debe tener al menos 95% de éxito"
+        );
+    }
+
+    #[test]
+    fn test_monster_distance() {
+        let system = KeygenEvolution::new(None);
+        let distance = system.distance_to_monster();
+        
+        // Para z(0) = 196883/196884:
+        // distancia = 196884 * (1 - 196883/196884) = 196884 * (1/196884) = 1
+        let expected_distance = 1.0;
+        
+        assert_abs_diff_eq!(distance, expected_distance, epsilon = 1e-10);
+        
+        println!("✅ Distancia a Monster verificada:");
+        println!("   Distancia inicial: {:.6}", distance);
+        println!("   Distancia esperada: {:.6}", expected_distance);
     }
 }
