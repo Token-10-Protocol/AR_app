@@ -46,34 +46,32 @@ impl KeygenEvolution {
     }
 
     fn keygen_to_fibonacci_field(keygen: f64) -> usize {
-        // Progreso del keygen normalizado
         let progress = (keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN);
         
-        // Campos Fibonacci (1-24)
-        if progress < 0.000015 { 1 }      // Campo 1: 3D
-        else if progress < 0.000025 { 2 } // Campo 2: 5D
-        else if progress < 0.000041 { 3 } // Campo 3: 8D
-        else if progress < 0.000107 { 4 } // Campo 4: 13D
-        else if progress < 0.000173 { 5 } // Campo 5: 21D
-        else if progress < 0.000280 { 6 } // Campo 6: 34D
-        else if progress < 0.000453 { 7 } // Campo 7: 55D
-        else if progress < 0.000733 { 8 } // Campo 8: 89D
-        else if progress < 0.001186 { 9 } // Campo 9: 144D
-        else if progress < 0.001919 { 10 } // Campo 10: 233D
-        else if progress < 0.003105 { 11 } // Campo 11: 377D
-        else if progress < 0.005024 { 12 } // Campo 12: 610D
-        else if progress < 0.008129 { 13 } // Campo 13: 987D
-        else if progress < 0.013153 { 14 } // Campo 14: 1597D
-        else if progress < 0.021282 { 15 } // Campo 15: 2584D
-        else if progress < 0.034435 { 16 } // Campo 16: 4181D
-        else if progress < 0.055717 { 17 } // Campo 17: 6765D
-        else if progress < 0.090152 { 18 } // Campo 18: 10946D
-        else if progress < 0.145869 { 19 } // Campo 19: 17711D
-        else if progress < 0.236021 { 20 } // Campo 20: 28657D
-        else if progress < 0.381890 { 21 } // Campo 21: 46368D
-        else if progress < 0.617911 { 22 } // Campo 22: 75025D
-        else if progress < 1.0 { 23 }      // Campo 23: 121393D
-        else { 24 }                        // Campo 24: 196418D
+        if progress < 0.000015 { 1 }
+        else if progress < 0.000025 { 2 }
+        else if progress < 0.000041 { 3 }
+        else if progress < 0.000107 { 4 }
+        else if progress < 0.000173 { 5 }
+        else if progress < 0.000280 { 6 }
+        else if progress < 0.000453 { 7 }
+        else if progress < 0.000733 { 8 }
+        else if progress < 0.001186 { 9 }
+        else if progress < 0.001919 { 10 }
+        else if progress < 0.003105 { 11 }
+        else if progress < 0.005024 { 12 }
+        else if progress < 0.008129 { 13 }
+        else if progress < 0.013153 { 14 }
+        else if progress < 0.021282 { 15 }
+        else if progress < 0.034435 { 16 }
+        else if progress < 0.055717 { 17 }
+        else if progress < 0.090152 { 18 }
+        else if progress < 0.145869 { 19 }
+        else if progress < 0.236021 { 20 }
+        else if progress < 0.381890 { 21 }
+        else if progress < 0.617911 { 22 }
+        else if progress < 1.0 { 23 }
+        else { 24 }
     }
 
     /// Evoluciona según ecuación φ-resonante en escala Monster
@@ -141,7 +139,7 @@ impl KeygenEvolution {
         let last = self.history.last().unwrap();
         let growth = (last - first) / first;
         
-        format!("z(0)={:.6}, z({})={:.6}, crecimiento={:.6}%", 
+        format!("z(0)={:.6}, z({})={:.6}, cambio={:.6}%", 
                 first, self.iteration, last, growth * 100.0)
     }
 }
@@ -169,65 +167,78 @@ mod tests {
         assert_abs_diff_eq!(
             system.get_current_keygen_monster(),
             INITIAL_KEYGEN_MONSTER,
-            epsilon = 0.01  // Permitir pequeña diferencia numérica
+            epsilon = 0.01
         );
         
         assert_eq!(system.get_iteration(), 0);
     }
-#[test]
-fn test_growth_behavior() {
-    let mut system = KeygenEvolution::new(None);
-    let initial = system.get_current_keygen();
-    
-    println!("Comportamiento REAL de crecimiento:");
-    println!("  z(0) = {:.12} (MUY cerca de 1.0)", initial);
-    
-    // Evolucionar y monitorear
-    let steps = 20;
-    let results = system.evolve_steps(steps);
-    
-    for (i, &z) in results.iter().enumerate().step_by(5) {
-        println!("  z({}) = {:.12}", i+1, z);
-    }
-    
-    let last = results.last().unwrap();
-    println!("  z({}) = {:.12}", steps, last);
-    println!("  Cambio total: {:.6}%", (last - initial) / initial * 100.0);
-    
-    // Verificaciones CORREGIDAS:
-    // 1. z(0) debe ser muy alto
-    assert!(initial > 0.99999, "z(0) debe estar muy cerca de 1.0");
-    
-    // 2. z(1) debe ser MUCHO más bajo (caída inicial)
-    let z1 = results[0];
-    assert!(z1 < initial, "z(1) debe ser menor que z(0) (caída inicial)");
-    
-    // 3. Después de la caída, debe haber crecimiento
-    if steps >= 3 {
-        assert!(results[2] > results[1], "Después de caer, debe crecer");
-    }
-    
-    // 4. No debe ser constante
-    let all_same = results.windows(2).all(|w| (w[1] - w[0]).abs() < 1e-15);
-    assert!(!all_same, "El keygen debe cambiar, no ser constante");
-}
-        assert!(last < &1.0, "Debe ser menor que 1.0");
+
+    #[test]
+    fn test_evolution_equation() {
+        let mut system = KeygenEvolution::new(None);
+        let z0_monster = system.get_current_keygen_monster();
         
-        // Verificar que no es constante
+        let expected_z1_monster = PHI * z0_monster * (1.0 - z0_monster / MONSTER_DIM);
+        let expected_z1 = expected_z1_monster / MONSTER_DIM;
+        
+        let actual_z1 = system.evolve();
+        
+        println!("Evolución:");
+        println!("  z(0)_monster = {:.2}", z0_monster);
+        println!("  z(1)_monster esperado = {:.2}", expected_z1_monster);
+        println!("  z(1) esperado = {:.12}", expected_z1);
+        println!("  z(1) obtenido = {:.12}", actual_z1);
+        
+        let diff = (actual_z1 - expected_z1).abs();
+        println!("  Diferencia: {:.2e}", diff);
+        
+        assert!(
+            diff < 1e-10,
+            "Ecuación no se cumple: diff = {:.2e} > 1e-10",
+            diff
+        );
+    }
+
+    #[test]
+    fn test_growth_behavior() {
+        let mut system = KeygenEvolution::new(None);
+        let initial = system.get_current_keygen();
+        
+        println!("Comportamiento REAL de crecimiento:");
+        println!("  z(0) = {:.12} (MUY cerca de 1.0)", initial);
+        
+        let steps = 20;
+        let results = system.evolve_steps(steps);
+        
+        for (i, &z) in results.iter().enumerate().step_by(5) {
+            println!("  z({}) = {:.12}", i+1, z);
+        }
+        
+        let last = results.last().unwrap();
+        println!("  z({}) = {:.12}", steps, last);
+        println!("  Cambio total: {:.6}%", (last - initial) / initial * 100.0);
+        
+        assert!(initial > 0.99999, "z(0) debe estar muy cerca de 1.0");
+        
+        let z1 = results[0];
+        assert!(z1 < initial, "z(1) debe ser menor que z(0) (caída inicial)");
+        
+        if steps >= 3 {
+            assert!(results[2] > results[1], "Después de caer, debe crecer");
+        }
+        
         let all_same = results.windows(2).all(|w| (w[1] - w[0]).abs() < 1e-15);
         assert!(!all_same, "El keygen debe cambiar, no ser constante");
     }
 
     #[test]
     fn test_field_progression() {
-        // Sistema que comienza más bajo para ver progresión de campos
-        let lower_start = 0.5; // 50% de saturación
+        let lower_start = 0.5;
         let mut system = KeygenEvolution::new(Some(lower_start));
         
         println!("Progresión de campos desde {:.1}%:", lower_start * 100.0);
         println!("  Campo inicial: {}", system.get_current_field());
         
-        // Evolucionar
         let mut last_field = system.get_current_field();
         for i in 0..50 {
             system.evolve();
@@ -273,18 +284,14 @@ fn test_growth_behavior() {
     
     #[test]
     fn test_mathematical_correctness() {
-        // Test para verificar que la implementación es matemáticamente correcta
         let mut system = KeygenEvolution::new(None);
         
-        // z(0) debe ser muy cercano a 1 en escala [0,1]
         let z0 = system.get_current_keygen();
         assert!(z0 > 0.99999 && z0 < 1.0, "z(0) debe estar cerca de 1.0");
         
-        // Evolucionar y verificar que decrece (porque z(0) está cerca del máximo)
         let z1 = system.evolve();
         assert!(z1 < z0, "z(1) debe ser menor que z(0) cuando z(0) ≈ 1");
         
-        // Después de decrecer, debe comenzar a crecer
         let z2 = system.evolve();
         assert!(z2 > z1, "Después del decrecimiento inicial, debe crecer");
         
