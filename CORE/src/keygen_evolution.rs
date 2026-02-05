@@ -52,16 +52,11 @@ impl KeygenEvolution {
     }
 
     /// Evoluciona el keygen un paso según ecuación φ-resonante
-    /// Evoluciona el keygen un paso según ecuación φ-resonante
     pub fn evolve(&mut self) -> f64 {
         let z_prev = self.current_keygen;
-        // Escalar a dimensión Monster
         let z_scaled = z_prev * MONSTER_DIM;
-        // Ecuación fundamental: z(n) = φ·z(n-1)·(1 - z(n-1)/196884)
         let z_next_scaled = PHI * z_scaled * (1.0 - z_scaled / MONSTER_DIM);
-        // Desescalar
         let z_next = z_next_scaled / MONSTER_DIM;
-        
         let love_acceleration = self.love_operator.get_intensity().ln() / PHI.ln();
         let z_final = z_next * PHI.powf(love_acceleration * 0.01);
         self.current_keygen = z_final.max(INITIAL_KEYGEN).min(1.0);
@@ -70,6 +65,15 @@ impl KeygenEvolution {
         let progress = (self.current_keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN);
         self.love_operator.update_intensity(progress * 0.1);
         self.current_keygen
+    }
+
+    /// Evoluciona múltiples pasos
+    pub fn evolve_steps(&mut self, steps: u64) -> Vec<f64> {
+        let mut results = Vec::with_capacity(steps as usize);
+        for _ in 0..steps {
+            results.push(self.evolve());
+        }
+        results
     }
 
     /// Evoluciona hasta alcanzar un umbral específico
@@ -333,7 +337,7 @@ mod tests {
 
     #[test]
     fn test_batch_evolution() {
-        let initials = vec![INITIAL_KEYGEN, 0.999, 0.9995];
+        let initials = vec![0.3, 0.4, 0.5];
         let results = batch_evolution(&initials, 10);
         assert_eq!(results.len(), 3);
         for (i, evolution) in results.iter().enumerate() {
