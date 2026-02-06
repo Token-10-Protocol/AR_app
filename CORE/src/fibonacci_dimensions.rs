@@ -21,7 +21,6 @@
 
 use nalgebra::{DMatrix, Complex, DVector, Normed};
 use std::f64::consts::PI;
-use std::ops::{Mul, Div};
 
 use crate::matrix_444::PHI;
 use crate::love_operator::LoveOperator;
@@ -208,8 +207,9 @@ impl CampoFibonacci {
         // Normalizar para mantener estabilidad
         let norma = matriz.norm();
         if norma > 0.0 {
-            // Multiplicar por escalar en lugar de dividir
-            matriz = matriz.mul(1.0 / norma);
+            // Usar escala por escalar complejo
+            let factor = Complex::new(1.0 / norma, 0.0);
+            matriz = matriz.scale(factor.re); // scale toma f64
         }
         
         matriz
@@ -349,8 +349,8 @@ impl CampoFibonacci {
         // Aplicar operador Â del campo
         let estado_con_amor = self.operador_amor.apply(&estado_transformado);
         
-        // Escalar por nivel de activación
-        Ok(estado_con_amor.mul(self.activacion.sqrt()))
+        // Escalar por nivel de activación usando scale
+        Ok(estado_con_amor.scale(self.activacion.sqrt()))
     }
     
     /// Transición a campo adyacente (∆k = ±1 según Documentación Fotónica)
@@ -370,7 +370,7 @@ impl CampoFibonacci {
         
         // Aplicar transformación φ-resonante entre campos
         let factor_transicion = PHI.powi(-(diferencia as i32));
-        let mut estado_transicion = estado_redimensionado.mul(factor_transicion);
+        let mut estado_transicion = estado_redimensionado.scale(factor_transicion);
         
         // Aplicar operador Â del campo destino
         estado_transicion = campo_destino.operador_amor.apply(&estado_transicion);
@@ -396,7 +396,7 @@ impl CampoFibonacci {
         for i in 0..min_dim {
             // Factor de preservación según posición Fibonacci
             let factor_preservacion = PHI.powi(-((i % 10) as i32));
-            nuevo_estado[i] = estado[i].mul(factor_preservacion);
+            nuevo_estado[i] = estado[i] * factor_preservacion;
         }
         
         // Si expandiendo, llenar con patrones Fibonacci
