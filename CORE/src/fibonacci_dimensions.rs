@@ -2,7 +2,7 @@
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
 
-use nalgebra::{Complex, DVector, Normed};
+use nalgebra::{Complex, DVector};
 use std::f64::consts::PI;
 
 use crate::matrix_444::PHI;
@@ -280,7 +280,7 @@ mod tests {
     fn test_propiedad_emergente() {
         // NOTA: Según Documento Atómico, la propiedad es APROXIMADA
         // Σ primeros 12 ≈ F₁₇ - 1 = 1596
-        let (verificacion, suma, proporcion) = verificar_propiedad_emergente();
+        let (_verificacion, suma, proporcion) = verificar_propiedad_emergente();
         
         println!("🔍 Propiedad emergente certificada:");
         println!("  Σ primeros 12 campos = {}", suma);

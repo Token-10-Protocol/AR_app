@@ -6,3 +6,4 @@ pub mod algebra_griess;
 pub mod love_operator;
 pub mod keygen_evolution;
 pub mod fibonacci_dimensions;
+pub mod phi_constants;
