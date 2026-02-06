@@ -2,11 +2,10 @@
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
 
-use nalgebra::{DMatrix, Complex, DVector, Normed};
+use nalgebra::{Complex, DVector};
 use std::f64::consts::PI;
 
 use crate::matrix_444::PHI;
-use crate::keygen_evolution::MONSTER_DIM;
 
 /// Número de campos Fibonacci dimensionales
 pub const NUM_CAMPOS_FIBONACCI: usize = 24;
@@ -64,8 +63,8 @@ impl CampoFibonacci {
             0.01 + 0.99 * PHI.powf(progresion - 1.0)
         };
         
-        // Generar estados base corregidos
-        let estados_base = Self::generar_estados_base_corregidos(dimension, numero);
+        // Generar estados base usando método alternativo
+        let estados_base = Self::generar_estados_base_alternativo(dimension, numero);
         
         Ok(CampoFibonacci {
             numero,
@@ -77,34 +76,47 @@ impl CampoFibonacci {
         })
     }
     
-    /// Genera estados base corregidos (sin error de inferencia)
-    fn generar_estados_base_corregidos(dimension: usize, numero: usize) -> Vec<DVector<Complex<f64>>> {
+    /// Método alternativo para generar estados base - SIN problemas de inferencia
+    fn generar_estados_base_alternativo(dimension: usize, numero: usize) -> Vec<DVector<Complex<f64>>> {
         let mut bases = Vec::with_capacity(dimension);
         
-        // Método simple: usar vectores de la base estándar y ortogonalizar
+        // Usar método más simple: vectores de Fourier discretos
         for i in 0..dimension {
             let mut vector = DVector::zeros(dimension);
-            vector[i] = Complex::new(1.0, 0.0);
             
-            // Aplicar rotación φ-resonante
-            let angle = 2.0 * PI * PHI * (i as f64) / (dimension as f64);
+            // Patrón de fase φ-resonante
             for j in 0..dimension {
-                let phase = angle * (j as f64);
-                vector[j] = Complex::new(phase.cos(), phase.sin()) / (dimension as f64).sqrt();
+                let fase = 2.0 * PI * PHI * (i as f64) * (j as f64) / (dimension as f64);
+                vector[j] = Complex::new(fase.cos(), fase.sin()) / (dimension as f64).sqrt();
             }
             
-            // Ortogonalizar con Gram-Schmidt corregido
-            for prev in &bases {
-                let proj = vector.dot(prev);
-                // CORRECCIÓN: Usar escala explícita
-                let scale_val = proj.re;
-                let scaled_prev = prev.scale(scale_val);
-                vector = vector - scaled_prev;
-            }
-            
-            if vector.norm() > 1e-12 {
-                vector = vector.normalize();
+            // Ortogonalización simple: si es el primer vector, añadirlo directamente
+            if bases.is_empty() {
                 bases.push(vector);
+            } else {
+                // Ortogonalizar manualmente sin problemas de inferencia
+                let mut ortogonalizado = vector.clone();
+                
+                for base in &bases {
+                    // Calcular proyección manualmente
+                    let mut proj = Complex::new(0.0, 0.0);
+                    for k in 0..dimension {
+                        proj += ortogonalizado[k].conj() * base[k];
+                    }
+                    
+                    // Restar proyección manualmente
+                    let scale = proj.re; // Usar solo parte real
+                    for k in 0..dimension {
+                        ortogonalizado[k] = ortogonalizado[k] - base[k] * scale;
+                    }
+                }
+                
+                // Normalizar si no es cero
+                let norm = ortogonalizado.norm();
+                if norm > 1e-12 {
+                    ortogonalizado = ortogonalizado.scale(1.0 / norm);
+                    bases.push(ortogonalizado);
+                }
             }
         }
         
@@ -138,7 +150,7 @@ impl CampoFibonacci {
     }
     
     /// Verifica coherencia del campo
-    pub fn verificar_coherencia(&self, tolerancia: f64) -> Vec<(String, bool)> {
+    pub fn verificar_coherencia(&self, _tolerancia: f64) -> Vec<(String, bool)> {
         let mut resultados = Vec::new();
         
         // 1. Dimensión correcta
@@ -189,6 +201,8 @@ impl SistemaCamposFibonacci {
                 suma, F17_MINUS_1
             ));
         }
+        
+        println!("✅ Propiedad emergente verificada: Σ primeros 12 = {} = F₁₇ - 1", suma);
         
         Ok(SistemaCamposFibonacci {
             campos,
