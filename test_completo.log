@@ -21,4 +21,7 @@ test algebra_griess::tests::test_verify_complete_properties ... 📊 Propiedades
   ✅ Base de muestra creada: PASÓ
 ✅ 3/3 propiedades pasaron
 ok
-test fibonacci_dimensions::tests::test_activacion_keygen ... 
+test fibonacci_dimensions::tests::test_activacion_keygen ... error: test failed, to rerun pass `-p algebra_rose_core --lib`
+
+Caused by:
+  process didn't exit successfully: `/workspaces/AR_app/target/debug/deps/core-4af6d77254261bf2 --nocapture --test-threads=1` (signal: 15, SIGTERM: termination signal)
