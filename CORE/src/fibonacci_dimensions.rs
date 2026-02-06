@@ -104,7 +104,7 @@ impl SistemaCamposFibonacci {
     /// Actualiza activación según keygen evolutivo (REF: Documento Atómico, Ec. z(n))
     pub fn actualizar_por_keygen(&mut self, keygen: f64) {
         // Umbrales basados en progresión φ (REF: Documento Fotónico, Sec. 2.1)
-        let umbral_base = 0.99999492; // z(0) = 196883/196884
+        let umbral_base = 196883.0 / 196884.0; // z(0) = 196883/196884
         
         for (i, campo) in self.campos.iter_mut().enumerate() {
             // Fórmula certificada: activar si keygen > umbral_base * factor_campo
