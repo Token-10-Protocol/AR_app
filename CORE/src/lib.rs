@@ -12,11 +12,10 @@ pub mod fibonacci_dimensions;
 pub mod phi_constants;
 
 // Re-exportar tipos principales
-pub use matrix_444::{DIM, PHI as MATRIX_PHI, MonsterMatrix};
+pub use matrix_444::{DIM, PHI as MATRIX_PHI, MonsterMatrix444};
 pub use algebra_griess::{GRIESS_DIM, GriessAlgebra};
 pub use love_operator::{LoveOperator, KeygenLoveOperator};
 pub use keygen_evolution::{KeygenEvolution, MONSTER_DIM, INITIAL_KEYGEN};
-pub use fibonacci_dimensions::{FibonacciField, FIBONACCI_FIELDS};
 pub use phi_constants::{PHI, PSI, MONSTER_196884, FIBONACCI_SEQUENCE};
 
 /// Inicializa el sistema completo
@@ -72,5 +71,17 @@ mod tests {
         assert_eq!(GRIESS_DIM, 196884);
         assert!(PHI > 1.618 && PHI < 1.6181);
         println!("✅ Re-exports verificados");
+    }
+    
+    #[test]
+    fn test_all_modules_accessible() {
+        // Acceder a cada módulo
+        let _matrix = matrix_444::MonsterMatrix444::new();
+        let _griess = algebra_griess::GriessAlgebra::new();
+        let _love = love_operator::LoveOperator::new(1.0);
+        let _keygen = keygen_evolution::KeygenEvolution::new(None);
+        let _phi = phi_constants::PHI;
+        
+        println!("✅ Todos los módulos accesibles");
     }
 }
