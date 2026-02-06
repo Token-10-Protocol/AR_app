@@ -2,7 +2,6 @@
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
 
-
 /// φ (PHI) - Proporción Áurea con alta precisión
 /// φ = (1 + √5)/2 ≈ 1.61803398874989484820458683436563811772030917980576
 pub const PHI: f64 = 1.61803398874989484820458683436563811772030917980576;
@@ -226,7 +225,7 @@ mod tests {
         // Propiedad emergente: Σ primeros 12 ≈ F₁₇ - 1
         let sum_first_12: usize = FIBONACCI_SEQUENCE[..12].iter().sum();
         assert_eq!(sum_first_12, 1592); // F₁₇ = 1597
-        println!("Σ primeros 12 campos: {} ≈ F₁₇ - 1 = 1596", sum_first_12);
+        println!("Σ primeros 12 campos: {} ≈ F₁₇ - 1 = 1592", sum_first_12);
     }
 
     #[test]

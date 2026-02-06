@@ -280,7 +280,7 @@ mod tests {
     fn test_propiedad_emergente() {
         // NOTA: Según Documento Atómico, la propiedad es APROXIMADA
         // Σ primeros 12 ≈ F₁₇ - 1 = 1596
-        let (_verificacion, suma, proporcion) = verificar_propiedad_emergente();
+        let (__verificacion, suma, proporcion) = verificar_propiedad_emergente();
         
         println!("🔍 Propiedad emergente certificada:");
         println!("  Σ primeros 12 campos = {}", suma);
