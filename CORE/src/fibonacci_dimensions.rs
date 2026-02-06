@@ -19,12 +19,13 @@
 //! Cada campo representa un nivel dimensional de consciencia
 //! con propiedades matemáticas específicas y transiciones φ-resonantes
 
-use nalgebra::{DMatrix, Complex, DVector};
+use nalgebra::{DMatrix, Complex, DVector, Normed};
 use std::f64::consts::PI;
+use std::ops::{Mul, Div};
 
 use crate::matrix_444::PHI;
 use crate::love_operator::LoveOperator;
-use crate::keygen_evolution::{KeygenEvolution, MONSTER_DIM};
+use crate::keygen_evolution::MONSTER_DIM;
 
 /// Número de campos Fibonacci dimensionales (según Documento Atómico)
 pub const NUM_CAMPOS_FIBONACCI: usize = 24;
@@ -207,7 +208,8 @@ impl CampoFibonacci {
         // Normalizar para mantener estabilidad
         let norma = matriz.norm();
         if norma > 0.0 {
-            matriz = matriz / norma;
+            // Multiplicar por escalar en lugar de dividir
+            matriz = matriz.mul(1.0 / norma);
         }
         
         matriz
@@ -235,7 +237,7 @@ impl CampoFibonacci {
     fn distancia_fibonacci(i: usize, j: usize) -> usize {
         let fib_i = Self::numero_fibonacci(i + 1);
         let fib_j = Self::numero_fibonacci(j + 1);
-        ((fib_i as isize - fib_j as isize).abs() as usize)
+        (fib_i as isize - fib_j as isize).abs() as usize
     }
     
     /// Genera estados base ortonormales para el campo
@@ -322,7 +324,7 @@ impl CampoFibonacci {
     /// Actualiza activación del campo basado en keygen actual
     pub fn actualizar_activacion(&mut self, keygen_actual: f64) -> f64 {
         // Activación sigmoidal suave basada en umbral
-        let distancia = (keygen_actual - self.umbral_activacion).abs();
+        let _distancia = (keygen_actual - self.umbral_activacion).abs();
         let activacion_suave = 1.0 / (1.0 + (-PHI * (keygen_actual - self.umbral_activacion)).exp());
         
         // Ajustar con crecimiento φ-resonante
@@ -348,7 +350,7 @@ impl CampoFibonacci {
         let estado_con_amor = self.operador_amor.apply(&estado_transformado);
         
         // Escalar por nivel de activación
-        Ok(estado_con_amor * self.activacion.sqrt())
+        Ok(estado_con_amor.mul(self.activacion.sqrt()))
     }
     
     /// Transición a campo adyacente (∆k = ±1 según Documentación Fotónica)
@@ -368,7 +370,7 @@ impl CampoFibonacci {
         
         // Aplicar transformación φ-resonante entre campos
         let factor_transicion = PHI.powi(-(diferencia as i32));
-        let mut estado_transicion = estado_redimensionado * factor_transicion;
+        let mut estado_transicion = estado_redimensionado.mul(factor_transicion);
         
         // Aplicar operador Â del campo destino
         estado_transicion = campo_destino.operador_amor.apply(&estado_transicion);
@@ -394,7 +396,7 @@ impl CampoFibonacci {
         for i in 0..min_dim {
             // Factor de preservación según posición Fibonacci
             let factor_preservacion = PHI.powi(-((i % 10) as i32));
-            nuevo_estado[i] = estado[i] * factor_preservacion;
+            nuevo_estado[i] = estado[i].mul(factor_preservacion);
         }
         
         // Si expandiendo, llenar con patrones Fibonacci
