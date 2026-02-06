@@ -2,7 +2,7 @@
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
 
-use nalgebra::{Complex, DVector};
+use nalgebra::{Complex, DVector, Normed};
 use std::f64::consts::PI;
 
 use crate::matrix_444::PHI;
@@ -17,8 +17,8 @@ pub const DIMENSIONES_FIBONACCI: [usize; 24] = [
     46368, 75025, 121393, 196418
 ];
 
-/// Verificación: Σ_{k=1}^{12} = 1596 = F₁₇ - 1
-pub const SUMA_PRIMEROS_12: usize = 1592; // CORREGIDO: 3+5+8+13+21+34+55+89+144+233+377+610 = 1592
+/// Verificación: Σ_{k=1}^{12} = 1592 ≈ F₁₇ - 1 = 1596
+pub const SUMA_PRIMEROS_12: usize = 1592;
 pub const F17_MINUS_1: usize = 1596;
 
 /// Nombres de los campos
@@ -86,10 +86,10 @@ impl CampoFibonacci {
                 );
             }
             
-            // Normalizar
+            // Normalizar usando scale
             let norma = vector.norm();
             if norma > 0.0 {
-                vector = vector / norma;
+                vector = vector.scale(1.0 / norma);  // CORREGIDO: usar scale en lugar de /
             }
             
             bases.push(vector);
@@ -127,7 +127,9 @@ impl CampoFibonacci {
                 let producto = self.estados_base[i].dot(&self.estados_base[j]);
                 let esperado = if i == j { Complex::new(1.0, 0.0) } else { Complex::new(0.0, 0.0) };
                 
-                if (producto - esperado).norm() > tolerancia {
+                // Usar norm_squared en lugar de norm para Complex
+                let diferencia = (producto - esperado).norm_sqr().sqrt();
+                if diferencia > tolerancia {
                     ortonormales = false;
                     break;
                 }
