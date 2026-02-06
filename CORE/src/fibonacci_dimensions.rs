@@ -19,11 +19,11 @@
 //! Propiedad emergente certificada (Documento Atómico):
 //! Σ_{k=1}^{12} dim(C_k) = F₁₇ - 1 = 1596 ≈ 1597 (Campo 14: Multiversos)
 
-use nalgebra::{DMatrix, Complex, DVector, Normed, Scalar};
+use nalgebra::{DMatrix, Complex, DVector, Normed};
 use std::f64::consts::PI;
 
 use crate::matrix_444::PHI;
-use crate::keygen_evolution::{KeygenEvolution, MONSTER_DIM};
+use crate::keygen_evolution::MONSTER_DIM;
 
 /// Número de campos Fibonacci dimensionales (según Documento Atómico)
 pub const NUM_CAMPOS_FIBONACCI: usize = 24;
@@ -207,8 +207,6 @@ impl CampoFibonacci {
             let fdim = Self::fibonacci(dimension) as f64;
             
             for j in 0..dimension {
-                let fj = Self::fibonacci(j + 1) as f64;
-                
                 if i == j {
                     // Diagonal: φ × razón Fibonacci
                     let ratio = fi / fdim;
@@ -271,10 +269,11 @@ impl CampoFibonacci {
                 );
             }
             
-            // Ortonormalización certificada
+            // Ortonormalización certificada usando escala correcta
             for prev in &bases {
                 let proj = vector.dot(prev);
-                vector = vector - prev.scale(proj.re); // Proyección real
+                let scale_value = proj.re; // Usar solo parte real para escala
+                vector = vector - prev.scale(scale_value);
             }
             
             if vector.norm() > 1e-12 {
@@ -530,7 +529,6 @@ impl SistemaCamposFibonacci {
 pub fn verificar_propiedad_emergente() -> (bool, usize, usize, f64) {
     let suma: usize = DIMENSIONES_FIBONACCI[0..12].iter().sum();
     let esperado = F17_MINUS_1;
-    let diferencia = (suma as isize - esperado as isize).abs();
     let proporcion = suma as f64 / esperado as f64;
     
     (suma == esperado, suma, esperado, proporcion)
@@ -766,7 +764,7 @@ mod tests {
         
         assert_eq!(bases.len(), campo.dimension);
         
-        let mut max_error = 0.0;
+        let mut max_error: f64 = 0.0;
         for i in 0..bases.len() {
             for j in 0..bases.len() {
                 let producto = bases[i].dot(&bases[j]);
@@ -777,7 +775,7 @@ mod tests {
                 };
                 
                 let error = (producto - esperado).norm();
-                max_error = max_error.max(error);
+                max_error = if error > max_error { error } else { max_error };
                 
                 // Error máximo permitido: 1e-6
                 if error > 1e-6 {
