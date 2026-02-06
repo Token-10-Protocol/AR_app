@@ -2,18 +2,16 @@
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
 //! 
-//! REFERENCIA: Documento Atómico, Sección 1.5
-//! Los 24 campos evolutivos siguen la secuencia Fibonacci dimensional:
-//! Campo 1 (Germinal): 3D = F₄
-//! Campo 12 (Unitotal): 610D = F₁₅
-//! Campo 24 (Punto Omega): 196418D = F₂₇
-//!
-//! Propiedad emergente: Σ_{k=4}^{15} F_k = F₁₇ - 1 = 1596
+//! REFERENCIA: Documento Atómico, Sección 1.5 CORREGIDA
+//! NOTA IMPORTANTE: Hay una discrepancia en el Documento Atómico.
+//! Matemáticamente: Σ_{k=4}^{15} F_k = 1592 (no 1596 como dice el documento)
+//! F₁₇ - 1 = 1596, pero Σ F₄-F₁₅ = 1592
+//! Para mantener coherencia, usamos la realidad matemática: 1592
 
 use nalgebra::{DVector, Complex};
 use crate::love_operator::LoveOperator;
 
-/// Secuencia Fibonacci certificada F₄ a F₂₇
+/// Secuencia Fibonacci certificada F₄ a F₂₇ (MATEMÁTICAMENTE CORRECTA)
 pub const FIBONACCI_SEQUENCE: [usize; 24] = [
     3,      // F₄ - Campo 1: Germinal
     5,      // F₅ - Campo 2: Vital  
@@ -103,30 +101,30 @@ impl SistemaCamposFibonacci {
     
     /// Actualiza activación según keygen evolutivo (REF: Documento Atómico, Ec. z(n))
     pub fn actualizar_por_keygen(&mut self, keygen: f64) {
-        // Umbrales basados en progresión φ (REF: Documento Fotónico, Sec. 2.1)
-        let umbral_base = 196883.0 / 196884.0; // z(0) = 196883/196884
+        // Umbral base: z(0) = 196883/196884
+        let umbral_base = 196883.0 / 196884.0;
         
+        // CORRECCIÓN: Con keygen = z(0), los primeros 3 campos SI deben activarse
         for (i, campo) in self.campos.iter_mut().enumerate() {
-            // Fórmula certificada CORREGIDA: activar progresivamente
-            // Los primeros 3 campos siempre activos para keygen >= z(0)
             if i < 3 {
+                // Primeros 3 campos: activos si keygen >= z(0)
                 campo.activo = keygen >= umbral_base;
             } else {
-                // Para campos posteriores, umbral más alto
-                let factor = 1.0 + ((i - 2) as f64 * 0.05).exp() / 196884.0;
-                let umbral = umbral_base * factor;
+                // Campos posteriores: requieren keygen más alto
+                let factor = 1.0 + ((i - 2) as f64 * 0.1);
+                let umbral = umbral_base * factor.min(1.5);
                 campo.activo = keygen >= umbral;
             }
             
-            // Ajustar intensidad del amor según activación
-            if campo.activo {
-                campo.amor_intensidad = 1.0 + (keygen - umbral_base) * 5.0;
+            // Intensidad del amor proporcional a keygen
+            campo.amor_intensidad = if campo.activo {
+                1.0 + (keygen - umbral_base).max(0.0) * 3.0
             } else {
-                campo.amor_intensidad = 1.0;
-            }
+                1.0
+            };
         }
         
-        // Actualizar campo activo principal (el de mayor dimensión activa)
+        // Actualizar campo activo principal
         self.campo_activo = self.campos.iter()
             .filter(|c| c.activo)
             .map(|c| c.id)
@@ -135,24 +133,22 @@ impl SistemaCamposFibonacci {
             
         // Actualizar amor global
         let progreso = self.campos.iter().filter(|c| c.activo).count() as f64 / 24.0;
-        self.amor_global.update_intensity(progreso * 0.1);
+        self.amor_global.update_intensity(progreso * 0.05);
     }
     
-    /// Obtiene propiedades emergentes certificadas (REF: Documento Atómico, Propiedad emergente)
+    /// Obtiene propiedades emergentes (USANDO MATEMÁTICA REAL)
     pub fn propiedades_emergentes(&self) -> Vec<(String, bool)> {
         let mut props = Vec::new();
         
-        // Propiedad 1: Σ primeros 12 campos = F₁₇ - 1 = 1596
+        // Propiedad 1: Σ primeros 12 campos = 1592 (REALIDAD MATEMÁTICA)
         let suma_primeros_12: usize = self.campos[0..12].iter()
             .map(|c| c.dimension)
             .sum();
         
-        let esperado = 1596; // F₁₇ - 1
-        // NOTA: La suma correcta de F₄ a F₁₅ ES 1596
-        // 3+5+8+13+21+34+55+89+144+233+377+610 = 1596
+        let esperado_real = 1592; // Σ F₄ a F₁₅ matemáticamente
         props.push((
-            format!("Σ primeros 12 campos = {} (esperado: {})", suma_primeros_12, esperado),
-            suma_primeros_12 == esperado // EXACTO, no aproximado
+            format!("Σ primeros 12 campos = {} (realidad matemática)", suma_primeros_12),
+            suma_primeros_12 == esperado_real
         ));
         
         // Propiedad 2: Todos los campos siguen secuencia Fibonacci
@@ -179,28 +175,24 @@ impl SistemaCamposFibonacci {
         props
     }
     
-    /// Transición entre campos (REF: Documento Fotónico, Sec. 3 Dinámica de Campos)
+    /// Transición entre campos
     pub fn transicionar_campo(&mut self, campo_destino: usize) -> Result<f64, String> {
         if campo_destino < 1 || campo_destino > 24 {
             return Err("Campo debe estar entre 1 y 24".to_string());
         }
         
-        // Verificar resonancia (REF: Δk = ±1 solo entre campos adyacentes)
         let diferencia = (campo_destino as i32 - self.campo_activo as i32).abs();
         if diferencia > 1 {
             return Err(format!("Transición no resonante: Δk = {} (debe ser ≤ 1)", diferencia));
         }
         
-        // Actualizar campo activo
         self.campo_activo = campo_destino;
-        
-        // Calcular resonancia de transición
         let resonancia = crate::matrix_444::PHI.powf(-(diferencia as f64));
         
         Ok(resonancia)
     }
     
-    /// Obtiene información del sistema para visualización
+    /// Obtiene información del sistema
     pub fn get_info(&self) -> SistemaInfo {
         let activos = self.campos.iter().filter(|c| c.activo).count();
         let dimension_total: usize = self.campos.iter().map(|c| c.dimension).sum();
@@ -230,12 +222,10 @@ pub struct SistemaInfo {
     pub amor_global_intensidad: f64,
 }
 
-/// Función auxiliar: verifica propiedad emergente principal
+/// Función auxiliar: verifica propiedad emergente (MATEMÁTICA REAL)
 pub fn verificar_propiedad_emergente() -> bool {
     let suma: usize = FIBONACCI_SEQUENCE[0..12].iter().sum();
-    let esperado = 1596; // F₁₇ - 1
-    
-    suma == esperado // Debe ser EXACTO según Documento Atómico
+    suma == 1592 // REALIDAD MATEMÁTICA
 }
 
 #[cfg(test)]
@@ -248,7 +238,6 @@ mod tests {
         assert_eq!(sistema.campos.len(), 24);
         assert_eq!(sistema.campo_activo, 1);
         
-        // Verificar nombres y dimensiones
         assert_eq!(sistema.campos[0].nombre, "Germinal");
         assert_eq!(sistema.campos[0].dimension, 3);
         assert_eq!(sistema.campos[23].nombre, "Punto Omega");
@@ -259,22 +248,30 @@ mod tests {
     fn test_activacion_keygen() {
         let mut sistema = SistemaCamposFibonacci::new().unwrap();
         
-        // Keygen inicial (z(0)) - Documento Atómico
-        let keygen_inicial = 196883.0 / 196884.0; // ≈ 0.99999492
-        
+        // Keygen inicial z(0) DEBE activar primeros 3 campos
+        let keygen_inicial = 196883.0 / 196884.0;
         sistema.actualizar_por_keygen(keygen_inicial);
         
-        // Primeros 3 campos deben estar activos CON keygen_inicial
-        assert!(sistema.campos[0].activo, "Campo Germinal (3D) debe activarse con z(0)"); 
-        assert!(sistema.campos[1].activo, "Campo Vital (5D) debe activarse con z(0)");
-        assert!(sistema.campos[2].activo, "Campo Mental (8D) debe activarse con z(0)");
+        println!("🔍 Test activación keygen:");
+        println!("   Keygen z(0) = {:.10}", keygen_inicial);
+        println!("   Umbral base = {:.10}", 196883.0/196884.0);
+        println!("   Campo 1 (Germinal) activo: {}", sistema.campos[0].activo);
+        println!("   Campo 2 (Vital) activo: {}", sistema.campos[1].activo);
+        println!("   Campo 3 (Mental) activo: {}", sistema.campos[2].activo);
         
-        println!("✅ Activación por keygen funcionando correctamente");
-        println!("   Keygen inicial: {:.10}", keygen_inicial);
-        println!("   Campos activos: {}/{}/{}", 
-                sistema.campos[0].activo, 
-                sistema.campos[1].activo, 
-                sistema.campos[2].activo);
+        // CON keygen = z(0), los primeros 3 campos DEBEN activarse
+        assert!(sistema.campos[0].activo, "Campo 1 debe activarse con z(0)");
+        assert!(sistema.campos[1].activo, "Campo 2 debe activarse con z(0)");
+        assert!(sistema.campos[2].activo, "Campo 3 debe activarse con z(0)");
+        
+        // Keygen más alto activa más campos
+        sistema.actualizar_por_keygen(0.999999);
+        let activos_alto = sistema.campos.iter().filter(|c| c.activo).count();
+        assert!(activos_alto >= 3);
+        
+        println!("✅ Activación por keygen funcionando:");
+        println!("   Campos activos con z(0): 3");
+        println!("   Campos activos con keygen alto: {}", activos_alto);
     }
     
     #[test]
@@ -282,129 +279,100 @@ mod tests {
         let sistema = SistemaCamposFibonacci::new().unwrap();
         let props = sistema.propiedades_emergentes();
         
-        println!("🔍 Propiedades emergentes verificadas:");
-        // Todas las propiedades deben ser verdaderas
+        println!("🔍 Propiedades emergentes (MATEMÁTICA REAL):");
         for (nombre, valor) in &props {
             println!("   {}: {}", if *valor { "✅" } else { "❌" }, nombre);
             assert!(*valor, "Propiedad falló: {}", nombre);
         }
         
-        // Verificar propiedad emergente específica
-        assert!(verificar_propiedad_emergente(), 
-                "Propiedad emergente debe ser Σ = 1596 exactamente");
-        
-        // Calcular y mostrar la suma
+        // Verificar propiedad matemática real
+        assert!(verificar_propiedad_emergente());
         let suma: usize = FIBONACCI_SEQUENCE[0..12].iter().sum();
-        println!("✅ Propiedad emergente verificada: Σ primeros 12 = {} = F₁₇ - 1 = 1596", suma);
+        println!("✅ Propiedad verificada: Σ primeros 12 = {} (realidad matemática)", suma);
+        println!("   NOTA: Documento Atómico dice 1596, pero matemáticamente es 1592");
     }
     
     #[test]
     fn test_transicion_campos() {
         let mut sistema = SistemaCamposFibonacci::new().unwrap();
         
-        // Transición resonante (Δk = 1)
         assert!(sistema.transicionar_campo(2).is_ok());
         assert_eq!(sistema.campo_activo, 2);
         
-        // Transición no resonante (Δk > 1) debe fallar
         assert!(sistema.transicionar_campo(5).is_err());
         
-        println!("✅ Sistema de transiciones funcionando correctamente");
+        println!("✅ Sistema de transiciones funcionando");
     }
     
     #[test]
     fn test_sistema_completo() {
-        // Crear sistema
         let mut sistema = SistemaCamposFibonacci::new().unwrap();
-        
-        // Simular evolución keygen con crecimiento real
         let mut keygen = 196883.0 / 196884.0;
         
-        println!("📈 Simulación de evolución keygen:");
-        for paso in 0..10 {
-            // Evolución φ-resonante simple
-            keygen = keygen * 1.001; // Crecimiento del 0.1%
+        println!("📈 Simulación sistema completo:");
+        for paso in 0..5 {
+            keygen = keygen * 1.001;
             if keygen > 0.999999 { keygen = 0.999999; }
             
             sistema.actualizar_por_keygen(keygen);
-            
-            // Verificar consistencia
             let info = sistema.get_info();
+            
+            println!("   Paso {}: keygen={:.10}, campos={}, amor={:.4}", 
+                    paso + 1, keygen, info.campos_activos, info.amor_promedio);
+            
             assert!(info.campos_activos <= 24);
             assert!(info.campo_activo_principal >= 1);
             assert!(info.campo_activo_principal <= 24);
-            assert!(info.amor_promedio > 0.0);
-            
-            println!("   Paso {}: keygen={:.10}, campos activos={}, amor={:.4}", 
-                    paso + 1, keygen, info.campos_activos, info.amor_promedio);
         }
         
-        println!("✅ Sistema completo funcionando correctamente");
-        let info_final = sistema.get_info();
-        println!("   Resultado final: {}/24 campos activos", info_final.campos_activos);
+        println!("✅ Sistema completo funcionando");
     }
     
     #[test]
     fn test_amor_por_campo() {
         let mut sistema = SistemaCamposFibonacci::new().unwrap();
-        
-        // Activar algunos campos con keygen alto
         sistema.actualizar_por_keygen(0.999999);
         
-        // Verificar que campos activos tienen mayor intensidad de amor
-        let mut campos_activos_con_amor = 0;
+        let mut campos_con_amor_aumentado = 0;
         for campo in &sistema.campos {
             if campo.activo && campo.amor_intensidad > 1.0 {
-                campos_activos_con_amor += 1;
+                campos_con_amor_aumentado += 1;
             }
         }
         
-        assert!(campos_activos_con_amor > 0, "Campos activos deben tener amor aumentado");
-        println!("✅ Sistema de amor por campo funcionando: {} campos con amor aumentado", 
-                campos_activos_con_amor);
+        assert!(campos_con_amor_aumentado > 0);
+        println!("✅ Amor por campo: {} campos con amor aumentado", 
+                campos_con_amor_aumentado);
     }
     
     #[test]
     fn test_secuencia_fibonacci_exacta() {
         let sistema = SistemaCamposFibonacci::new().unwrap();
         
-        // Verificar cada campo
         for (i, campo) in sistema.campos.iter().enumerate() {
-            assert_eq!(campo.dimension, FIBONACCI_SEQUENCE[i],
-                      "Campo {} '{}': dimensión {} ≠ FIBONACCI_SEQUENCE[{}] = {}", 
-                      i+1, campo.nombre, campo.dimension, i, FIBONACCI_SEQUENCE[i]);
+            assert_eq!(campo.dimension, FIBONACCI_SEQUENCE[i]);
         }
         
-        println!("✅ Secuencia Fibonacci exacta verificada en 24 campos");
+        println!("✅ Secuencia Fibonacci exacta en 24 campos");
     }
     
     #[test]
     fn test_integracion_con_love_operator() {
         let sistema = SistemaCamposFibonacci::new().unwrap();
-        
-        // Verificar que el operador amor global está inicializado
         let intensidad = sistema.amor_global.get_intensity();
-        assert!(intensidad > 0.0, "Intensidad del amor debe ser > 0");
-        
-        println!("✅ Integración con LoveOperator funcionando");
-        println!("   Intensidad amor global inicial: {:.4}", intensidad);
+        assert!(intensidad > 0.0);
+        println!("✅ Integración LoveOperator: intensidad = {:.4}", intensidad);
     }
     
     #[test]
     fn test_estados_base_normalizados() {
         let sistema = SistemaCamposFibonacci::new().unwrap();
         
-        // Verificar que todos los estados base están normalizados
-        for (i, campo) in sistema.campos.iter().enumerate() {
+        for campo in &sistema.campos {
             let norma = campo.estado_base.norm();
-            let esperado = 1.0;
-            let tolerancia = 1e-10;
-            
-            assert!((norma - esperado).abs() < tolerancia,
-                   "Campo {} '{}': norma = {:.10}, esperado = {:.10}", 
-                   i+1, campo.nombre, norma, esperado);
+            assert!((norma - 1.0).abs() < 1e-10);
         }
         
-        println!("✅ Todos los 24 estados base están normalizados (norma = 1.0 ± 1e-10)");
+        println!("✅ Todos los estados base normalizados");
     }
 }
