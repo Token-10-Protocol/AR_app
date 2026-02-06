@@ -1,0 +1,24 @@
+   Compiling algebra_rose_core v0.1.0 (/workspaces/AR_app/CORE)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.55s
+     Running unittests src/lib.rs (target/debug/deps/core-4af6d77254261bf2)
+
+running 47 tests
+test algebra_griess::tests::test_basic_multiplication ... ok
+test algebra_griess::tests::test_from_monster_matrix ... ok
+test algebra_griess::tests::test_griess_dimension ... ok
+test algebra_griess::tests::test_initialization ... ok
+test algebra_griess::tests::test_multiply_verified ... ✅ multiply_verified exitoso, dimensión: 196884
+  result[0] = 51.00 + 50.00i
+  result[1] = 52.00 + 49.00i
+  result[2] = 51.00 + 50.00i
+  result[3] = 52.00 + 49.00i
+  result[4] = 51.00 + 50.00i
+ok
+test algebra_griess::tests::test_principal_eigenvector ... ok
+test algebra_griess::tests::test_verify_complete_properties ... 📊 Propiedades verificadas:
+  ✅ Dimensión 196884: PASÓ
+  ✅ Elemento identidad: PASÓ
+  ✅ Base de muestra creada: PASÓ
+✅ 3/3 propiedades pasaron
+ok
+test fibonacci_dimensions::tests::test_activacion_keygen ... 
