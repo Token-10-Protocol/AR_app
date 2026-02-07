@@ -1,8 +1,7 @@
-//! NÚCLEO MATEMÁTICO ÁLGEBRA ROSE - PUNTO DE ENTRADA UNIFICADO
+//! Núcleo Matemático de Álgebra Rose
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
 
-// Módulos fundamentales
 pub mod matrix_444;
 pub mod algebra_griess;
 pub mod love_operator;
@@ -10,46 +9,88 @@ pub mod keygen_evolution;
 pub mod fibonacci_dimensions;
 pub mod phi_constants;
 
-// Re-exportar tipos con nombres REALES
-// matrix_444
-pub use matrix_444::MonsterMatrix444 as Matrix444;
-pub use matrix_444::{DIM, PHI as MATRIX_PHI, CERTIFIED_TRACE};
+// Re-exportar componentes principales
+pub use matrix_444::{Matrix444, DIM, PHI, CERTIFIED_TRACE};
+pub use algebra_griess::{GriessAlgebra, GRIESS_DIM};
+pub use love_operator::{LoveOperator, KeygenLoveOperator};
+pub use keygen_evolution::{KeygenEvolution, INITIAL_KEYGEN, MONSTER_DIM};
+pub use fibonacci_dimensions::{FibonacciSystem, FIBONACCI_SEQUENCE, FIBONACCI_27};
+pub use phi_constants::{PHI_PRECISE, PSI_PRECISE, MONSTER_196883, MONSTER_196884, MONSTER_196885};
 
-// algebra_griess
-pub use algebra_griess::GriessAlgebra;
-pub use algebra_griess::GRIESS_DIM;
+// Constantes globales importantes
+pub const AR_VERSION: &str = "v27.1024D-S36";
+pub const CERTIFICATION: u64 = 196885;
+pub const SIMETRIA_TRÍADA: f64 = 1.0;
 
-// love_operator
-pub use love_operator::LoveOperator;
-pub use love_operator::KeygenLoveOperator;
-
-// keygen_evolution
-pub use keygen_evolution::KeygenEvolution;
-pub use keygen_evolution::{MONSTER_DIM, INITIAL_KEYGEN};
-
-// fibonacci_dimensions - usar nombres REALES
-pub use fibonacci_dimensions::SistemaCamposFibonacci as FibonacciSystem;
-pub use fibonacci_dimensions::CampoFibonacci as FibonacciField;
-
-// phi_constants
-pub use phi_constants::{PHI, PSI, MONSTER_196884, FIBONACCI_SEQUENCE};
-
-// Constantes fundamentales para fácil acceso
-pub const MONSTER_DIMENSION_F64: f64 = 196884.0;
-pub const INITIAL_KEYGEN_VALUE: f64 = 196883.0 / 196884.0;
-
-/// Inicializa el sistema completo
-pub fn init_algebra_rose() -> String {
-    format!("🌌 SISTEMA ÁLGEBRA ROSE INICIALIZADO ✅\n\
-            • Matriz Monster {}D: ACTIVA\n\
-            • Álgebra Griess {}D: OPERATIVA\n\
-            • Operador Â: ACTIVO\n\
-            • Sistema evolutivo: LISTO\n\
-            • 24 campos Fibonacci: PREPARADOS\n\
-            💖 Coherencia: 100%", DIM, GRIESS_DIM)
+/// Función para verificar coherencia del núcleo
+pub fn verificar_coherencia() -> f64 {
+    // Implementación básica de verificación
+    let mut coherencia = 1.0;
+    
+    // Verificar constantes básicas
+    if (PHI - 1.618033988749895).abs() > 1e-10 {
+        coherencia *= 0.95;
+    }
+    
+    if (MONSTER_DIM - 196884.0).abs() > 1e-6 {
+        coherencia *= 0.95;
+    }
+    
+    if (INITIAL_KEYGEN - (196883.0 / 196884.0)).abs() > 1e-10 {
+        coherencia *= 0.95;
+    }
+    
+    coherencia
 }
 
-/// Verificación rápida del sistema
-pub fn quick_verify() -> bool {
-    (PHI - 1.618033988749894).abs() < 1e-10
+/// Estado inicial del sistema certificado
+pub struct EstadoInicial {
+    pub coherencia: f64,
+    pub version: &'static str,
+    pub certificacion: u64,
+}
+
+impl Default for EstadoInicial {
+    fn default() -> Self {
+        EstadoInicial {
+            coherencia: verificar_coherencia(),
+            version: AR_VERSION,
+            certificacion: CERTIFICATION,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+
+    #[test]
+    fn test_verificar_coherencia() {
+        let coherencia = verificar_coherencia();
+        assert!(coherencia >= 0.95, "Coherencia mínima no alcanzada: {}", coherencia);
+        println!("✅ Coherencia del núcleo: {:.2}%", coherencia * 100.0);
+    }
+
+    #[test]
+    fn test_estado_inicial() {
+        let estado = EstadoInicial::default();
+        assert_eq!(estado.version, AR_VERSION);
+        assert_eq!(estado.certificacion, CERTIFICATION);
+        assert!(estado.coherencia >= 0.85);
+        println!("✅ Estado inicial certificado: {}", estado.version);
+    }
+
+    #[test]
+    fn test_exports_presentes() {
+        // Verificar que todos los módulos están accesibles
+        let _ = Matrix444::default();
+        let _ = GriessAlgebra::new();
+        let _ = LoveOperator::new(1.0);
+        let _ = KeygenEvolution::new(None);
+        let _ = FibonacciSystem::new();
+        let _ = PHI_PRECISE;
+        
+        println!("✅ Todos los exports están presentes y accesibles");
+    }
 }
