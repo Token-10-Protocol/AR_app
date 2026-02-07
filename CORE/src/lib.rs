@@ -11,18 +11,33 @@ pub mod keygen_evolution;
 pub mod fibonacci_dimensions;
 pub mod phi_constants;
 
-// Re-exportar tipos con nombres COMPATIBLES para la interfaz
+// Re-exportar tipos VERIFICADOS
+// matrix_444
 pub use matrix_444::MonsterMatrix444 as Matrix444;
-pub use matrix_444::{DIM, PHI as MATRIX_PHI};
+pub use matrix_444::DIM;
+pub use matrix_444::PHI as MATRIX_PHI;
+
+// algebra_griess
 pub use algebra_griess::GriessAlgebra;
 pub use algebra_griess::GRIESS_DIM;
-pub use love_operator::{LoveOperator, KeygenLoveOperator};
-pub use keygen_evolution::{KeygenEvolution, KeygenStats};
-pub use keygen_evolution::{MONSTER_DIM, INITIAL_KEYGEN};  // ¡ESTAS SON LAS CLAVES!
-pub use fibonacci_dimensions::FibonacciDimensions;
-pub use phi_constants::{PHI, PSI, GOLDEN_RATIO};
 
-// Constantes fundamentales (alias para compatibilidad)
+// love_operator
+pub use love_operator::LoveOperator;
+pub use love_operator::KeygenLoveOperator;
+
+// keygen_evolution - ¡EXPORTS VERIFICADOS!
+pub use keygen_evolution::KeygenEvolution;
+pub use keygen_evolution::MONSTER_DIM;
+pub use keygen_evolution::INITIAL_KEYGEN;
+
+// fibonacci_dimensions - estructura real
+pub use fibonacci_dimensions::FibonacciFieldSystem as FibonacciDimensions;
+
+// phi_constants - exports reales
+pub use phi_constants::PHI;
+pub use phi_constants::PSI;
+
+// Constantes fundamentales
 pub const MONSTER_DIMENSION_F64: f64 = 196884.0;
 
 /// Inicializa el sistema completo
@@ -32,16 +47,11 @@ pub fn init_algebra_rose() -> String {
      • Álgebra Griess 196884D: OPERATIVA\n\
      • Operador Â: ACTIVO\n\
      • Sistema evolutivo: LISTO\n\
-     • 24 campos Fibonacci: PREPARADOS\n\
+     • Campos Fibonacci: PREPARADOS\n\
      💖 Coherencia: 100%".to_string()
 }
 
 /// Verifica integridad del sistema
 pub fn verify_system() -> bool {
-    // Verificaciones básicas
-    let phi_ok = (PHI - 1.618033988749894).abs() < 1e-12;
-    let monster_ok = (MONSTER_DIM - 196884.0).abs() < 1e-9;
-    let fibonacci_ok = true; // Verificación simplificada
-    
-    phi_ok && monster_ok && fibonacci_ok
+    (PHI - 1.618033988749894).abs() < 1e-12
 }

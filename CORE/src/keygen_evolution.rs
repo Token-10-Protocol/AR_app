@@ -21,6 +21,20 @@ pub const INITIAL_KEYGEN: f64 = INITIAL_KEYGEN_MONSTER / MONSTER_DIM;
 
 /// Sistema evolutivo keygen φ-resonante (IMPLEMENTACIÓN FINAL)
 #[derive(Clone, Debug)]
+
+/// Estadísticas del sistema evolutivo
+#[derive(Clone, Debug)]
+pub struct KeygenStats {
+    pub current_value: f64,
+    pub iteration: u64,
+    pub history_len: usize,
+    pub active_fields: usize,
+    pub growth_rate: f64,
+    pub growth_acceleration: f64,
+    pub distance_to_monster: f64,
+    pub love_intensity: f64,
+}
+
 pub struct KeygenEvolution {
     /// Valor actual EN ESCALA MONSTER: z_monster(n) ∈ [0, 196884]
     current_keygen_monster: f64,
