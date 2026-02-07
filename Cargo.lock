@@ -6,6 +6,8 @@ version = 4
 name = "algebra_rose_core"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "approx",
  "nalgebra",
 ]
 
