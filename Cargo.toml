@@ -1,2 +1,7 @@
 [workspace]
 members = ["CORE", "INTERFACE"]
+resolver = "2"
+
+[workspace.dependencies]
+nalgebra = "0.32"
+approx = "0.5"
