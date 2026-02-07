@@ -435,7 +435,7 @@ fn main() {
     let mut session = ConsciousSession::new(cli.keygen);
     
     match cli.command {
-        Commands::Login { token } => {
+        Commands::Login { ref token } => {
             println!("{}", "🔐 Iniciando sesión consciente...".bright_blue());
             if let Some(t) = token {
                 println!("  Token recibido: {}", t);
