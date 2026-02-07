@@ -301,6 +301,22 @@ mod tests {
 }
 
 /// Evoluciona hasta alcanzar un umbral (para compatibilidad con interfaz)
+
+/// Evoluciona hasta alcanzar un umbral (para compatibilidad con interfaz)
+pub fn evolve_to_threshold(&mut self, threshold: f64, max_steps: u64) -> Result<(u64, f64), String> {
+    if threshold <= self.get_current_keygen() {
+        return Ok((0, self.get_current_keygen()));
+    }
+    
+    for step in 1..=max_steps {
+        self.evolve();
+        if self.get_current_keygen() >= threshold {
+            return Ok((step, self.get_current_keygen()));
+        }
+    }
+    
+    Err(format!("No se alcanzó el umbral {:.6} en {} pasos", threshold, max_steps))
+}
 pub fn evolve_to_threshold(&mut self, threshold: f64, max_steps: u64) -> Result<(u64, f64), String> {
     if threshold <= self.get_current_keygen() {
         return Ok((0, self.get_current_keygen()));
