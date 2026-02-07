@@ -20,15 +20,20 @@ pub const INITIAL_KEYGEN_MONSTER: f64 = 196883.0;
 pub const INITIAL_KEYGEN: f64 = INITIAL_KEYGEN_MONSTER / MONSTER_DIM;
 
 /// Sistema evolutivo keygen φ-resonante (IMPLEMENTACIÓN FINAL)
+/// Sistema evolutivo keygen φ-resonante (IMPLEMENTACIÓN FINAL)
 #[derive(Clone, Debug)]
-
+pub struct KeygenEvolution {
+    /// Valor actual en dimensión Monster: z_monster(n) ∈ [0, 196884]
+    current_keygen_monster: f64,
     /// Valor actual normalizado: z(n) ∈ [0, 1]
     current_keygen: f64,
+    /// Iteración actual n
     iteration: u64,
+    /// Historial de evoluciones
     history: Vec<f64>,
+    /// Campo Fibonacci actual activo
     current_fibonacci_field: usize,
 }
-
 impl KeygenEvolution {
     pub fn new(initial_keygen: Option<f64>) -> Self {
         let start_keygen_normalized = initial_keygen.unwrap_or(INITIAL_KEYGEN);
