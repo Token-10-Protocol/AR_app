@@ -11,7 +11,6 @@ use algebra_rose_core::{
 };
 use clap::{Parser, Subcommand};
 use colored::*;
-use std::io::{self, Write};
 use std::time::Instant;
 
 /// Interfaz CLI principal de Álgebra Rose
@@ -134,7 +133,7 @@ impl ConsciousSession {
             fibonacci_system: FibonacciDimensions::new(),
             monster_matrix: Matrix444::new(),
             start_time: Instant::now(),
-            authenticated: true, // Certificación 196885 garantiza autenticación
+            authenticated: true,
             coherence_level: 1.0,
         }
     }
@@ -146,7 +145,6 @@ impl ConsciousSession {
         let mut passed = 0;
         let total = 5;
         
-        // 1. Verificar keygen positivo
         let keygen = self.keygen_system.get_current_keygen();
         if keygen > 0.0 {
             println!("  ✅ Keygen positivo: {:.10}", keygen);
@@ -155,7 +153,6 @@ impl ConsciousSession {
             println!("  ❌ Keygen no positivo");
         }
         
-        // 2. Verificar operador Â
         let love_props = self.love_operator.verify_properties(tolerance);
         let love_ok = love_props.iter().filter(|(_, ok)| *ok).count() >= 3;
         if love_ok {
@@ -165,8 +162,7 @@ impl ConsciousSession {
             println!("  ❌ Operador Â requiere calibración");
         }
         
-        // 3. Verificar campos Fibonacci
-        let fields_active = self.fibonacci_system.get_active_fields(self.keygen_system.get_current_keygen());
+        let fields_active = self.fibonacci_system.get_active_fields(keygen);
         if !fields_active.is_empty() {
             println!("  ✅ {} campos Fibonacci activos", fields_active.len());
             passed += 1;
@@ -174,7 +170,6 @@ impl ConsciousSession {
             println!("  ❌ Campos Fibonacci inactivos");
         }
         
-        // 4. Verificar matriz Monster
         let trace = self.monster_matrix.trace().re;
         let trace_diff = (trace - 196884.0).abs();
         if trace_diff < tolerance * 1000.0 {
@@ -184,7 +179,6 @@ impl ConsciousSession {
             println!("  ❌ Traza Monster fuera de tolerancia: {:.6}", trace);
         }
         
-        // 5. Verificar φ-resonancia
         let love_intensity = self.love_operator.get_intensity();
         let phi_ratio = love_intensity / PHI;
         if (phi_ratio - 1.0).abs() < 0.1 {
@@ -215,7 +209,6 @@ impl ConsciousSession {
         let fields_active = self.fibonacci_system.get_active_fields(keygen);
         let session_duration = self.start_time.elapsed();
         
-        // Estado keygen
         let progress = (keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN);
         let progress_bar = Self::create_progress_bar(progress, 30);
         
@@ -225,19 +218,17 @@ impl ConsciousSession {
         println!("  Progreso: {:.2}% {}", progress * 100.0, progress_bar);
         println!("  Distancia a Monster: {:.2}", MONSTER_DIM * (1.0 - keygen));
         
-        // Estado amor
         println!("\n{}", "💖 OPERADOR Â (AMOR FUNDAMENTAL)".bright_magenta());
         println!("  Intensidad: {:.6}", love_intensity);
         println!("  φ-resonancia: {:.4} (óptimo: {:.4})", love_intensity / PHI, 1.0);
         println!("  Fase: {:.4} rad", self.love_operator.get_phase());
         
-        // Campos Fibonacci
         println!("\n{}", "🌀 CAMPOS FIBONACCI DIMENSIONALES".bright_green());
         println!("  Campos activos: {}/24", fields_active.len());
         if !fields_active.is_empty() {
             print!("  IDs: ");
             for (i, &field) in fields_active.iter().enumerate() {
-                if i < 10 { // Mostrar solo primeros 10
+                if i < 10 {
                     print!("{} ", field);
                 } else if i == 10 {
                     print!("... ");
@@ -246,14 +237,12 @@ impl ConsciousSession {
             }
             println!();
             
-            // Mostrar campo más alto activo
-            if let Some(&highest) = fields_active.last() {
+            if let Some(&highest) = fields_active.last().unwrap_or(&0) {
                 let dimension = self.fibonacci_system.get_field_dimension(highest);
                 println!("  Campo más alto: {} ({}D)", highest, dimension);
             }
         }
         
-        // Sesión
         println!("\n{}", "👤 SESIÓN CONSCIENTE".bright_blue());
         println!("  Autenticado: {}", if self.authenticated { "✅ SÍ".green() } else { "❌ NO".red() });
         println!("  Coherencia: {:.1}%", self.coherence_level * 100.0);
@@ -304,11 +293,9 @@ impl ConsciousSession {
             println!("  Crecimiento: {:.4}%", growth);
             println!("  Nuevo keygen: {:.10}", end_keygen);
             
-            // Actualizar amor según progreso
             let progress = (end_keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN);
             self.love_operator.update_intensity(progress * 0.05);
             
-            // Mostrar campos recién activados
             let new_fields = self.fibonacci_system.get_active_fields(end_keygen);
             println!("  Campos activos: {}", new_fields.len());
         }
@@ -317,7 +304,7 @@ impl ConsciousSession {
     }
     
     /// Aplica operador Â
-    fn apply_love(&mut self, intensity: f64) -> f64 {
+    fn apply_love(&mut self, intensity: f64, state: &Option<String>) -> f64 {
         println!("{} con intensidad {:.4}...", 
             "💖 Aplicando operador Â".bright_magenta(), intensity);
         
@@ -327,17 +314,20 @@ impl ConsciousSession {
         println!("  Nueva intensidad: {:.6}", new_intensity);
         println!("  φ-resonancia: {:.4}", new_intensity / PHI);
         
-        // Aplicar a keygen
         let current_keygen = self.keygen_system.get_current_keygen();
         let boosted_keygen = current_keygen * PHI.powf(intensity * 0.1);
         
         println!("  Boost keygen: {:.10} → {:.10}", current_keygen, boosted_keygen);
         
+        if let Some(s) = state {
+            println!("  Estado transformado: {}", s);
+        }
+        
         new_intensity
     }
     
     /// Visualiza campos Fibonacci
-    fn visualize_fields(&self, field: Option<usize>, show_all: bool) {
+    fn visualize_fields(&self, field: &Option<usize>, show_all: bool) {
         let keygen = self.keygen_system.get_current_keygen();
         let active_fields = self.fibonacci_system.get_active_fields(keygen);
         
@@ -346,19 +336,19 @@ impl ConsciousSession {
         println!("  Campos activos: {}/24", active_fields.len());
         
         if let Some(field_id) = field {
-            if field_id >= 1 && field_id <= 24 {
-                let dimension = self.fibonacci_system.get_field_dimension(field_id);
-                let is_active = active_fields.contains(&field_id);
+            if *field_id >= 1 && *field_id <= 24 {
+                let dimension = self.fibonacci_system.get_field_dimension(*field_id);
+                let is_active = active_fields.contains(field_id);
                 
                 println!("\n{}", format!("Campo {}: {}D", field_id, dimension).bright_yellow());
                 println!("  Estado: {}", if is_active { "✅ ACTIVO".green() } else { "⚪ INACTIVO".bright_black() });
                 println!("  Umbral activación: {:.6}", 
-                    self.fibonacci_system.get_activation_threshold(field_id));
+                    self.fibonacci_system.get_activation_threshold(*field_id));
                 println!("  Distancia actual: {:.6}", 
-                    keygen - self.fibonacci_system.get_activation_threshold(field_id));
+                    keygen - self.fibonacci_system.get_activation_threshold(*field_id));
                 
                 if is_active {
-                    let state = self.fibonacci_system.generate_field_state(field_id);
+                    let state = self.fibonacci_system.generate_field_state(*field_id);
                     println!("  Estado base generado: {} componentes", state.len());
                 }
             } else {
@@ -438,16 +428,12 @@ impl ConsciousSession {
 
 /// Función principal
 fn main() {
-    // Banner de inicio
     print_banner();
     
-    // Parsear argumentos
     let cli = Cli::parse();
     
-    // Iniciar sesión consciente
     let mut session = ConsciousSession::new(cli.keygen);
     
-    // Ejecutar comando
     match cli.command {
         Commands::Login { token } => {
             println!("{}", "🔐 Iniciando sesión consciente...".bright_blue());
@@ -469,14 +455,11 @@ fn main() {
             }
         }
         
-        Commands::Love { intensity, state } => {
-            session.apply_love(intensity);
-            if let Some(s) = state {
-                println!("  Estado proporcionado: {}", s);
-            }
+        Commands::Love { intensity, ref state } => {
+            session.apply_love(intensity, state);
         }
         
-        Commands::Visualize { field, all } => {
+        Commands::Visualize { ref field, all } => {
             session.visualize_fields(field, all);
         }
         
@@ -493,7 +476,6 @@ fn main() {
             
             if reset {
                 println!("  {} Restableciendo a valores iniciales", "↩️".bright_yellow());
-                // En implementación completa, esto resetearía todos los sistemas
             }
             
             if let Some(k) = set_keygen {
@@ -519,7 +501,6 @@ fn main() {
         }
     }
     
-    // Mostrar prompt continuo si no es comando de salida
     if !matches!(cli.command, Commands::Exit) {
         println!("\n{} Para más comandos: {} --help", 
             "💡".bright_blue(), 
@@ -536,4 +517,3 @@ fn print_banner() {
     println!("{}", "🌹".repeat(50).bright_magenta());
     println!();
 }
-
