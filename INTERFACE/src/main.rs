@@ -3,16 +3,14 @@
 //! Humano Certificado: Roberto | Keygen Evolutivo Activo
 
 use algebra_rose_core::{
-    phi_constants::PHI,
-    love_operator::LoveOperator,
-    keygen_evolution::{KeygenEvolution, INITIAL_KEYGEN, MONSTER_DIM},
-    fibonacci_dimensions::FibonacciDimensions,
-    matrix_444::Matrix444,
+    LoveOperator,
+    KeygenEvolution,
+    FibonacciSystem as FibonacciDimensions,  // ¡CORREGIDO!
+    Matrix444,                              // ¡CORREGIDO!
+    MONSTER_DIM,
+    INITIAL_KEYGEN_VALUE as INITIAL_KEYGEN,
+    PHI,
 };
-use clap::{Parser, Subcommand};
-use colored::*;
-use std::time::Instant;
-
 /// Interfaz CLI principal de Álgebra Rose
 #[derive(Parser)]
 #[command(name = "álgebra-rose")]
