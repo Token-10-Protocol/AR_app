@@ -1,0 +1,1 @@
+/workspaces/AR_app/target/debug/libalgebra_rose_core.rlib: /workspaces/AR_app/CORE/src/algebra_griess.rs /workspaces/AR_app/CORE/src/fibonacci_dimensions.rs /workspaces/AR_app/CORE/src/keygen_evolution.rs /workspaces/AR_app/CORE/src/lib.rs /workspaces/AR_app/CORE/src/love_operator.rs /workspaces/AR_app/CORE/src/matrix_444.rs /workspaces/AR_app/CORE/src/phi_constants.rs
