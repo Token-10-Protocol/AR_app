@@ -22,22 +22,6 @@ pub const INITIAL_KEYGEN: f64 = INITIAL_KEYGEN_MONSTER / MONSTER_DIM;
 /// Sistema evolutivo keygen φ-resonante (IMPLEMENTACIÓN FINAL)
 #[derive(Clone, Debug)]
 
-/// Estadísticas del sistema evolutivo
-#[derive(Clone, Debug)]
-pub struct KeygenStats {
-    pub current_value: f64,
-    pub iteration: u64,
-    pub history_len: usize,
-    pub active_fields: usize,
-    pub growth_rate: f64,
-    pub growth_acceleration: f64,
-    pub distance_to_monster: f64,
-    pub love_intensity: f64,
-}
-
-pub struct KeygenEvolution {
-    /// Valor actual EN ESCALA MONSTER: z_monster(n) ∈ [0, 196884]
-    current_keygen_monster: f64,
     /// Valor actual normalizado: z(n) ∈ [0, 1]
     current_keygen: f64,
     iteration: u64,
@@ -314,4 +298,20 @@ mod tests {
         println!("  z(1) = {:.12} < z(0) (decrece inicialmente)", z1);
         println!("  z(2) = {:.12} > z(1) (luego crece)", z2);
     }
+}
+
+/// Evoluciona hasta alcanzar un umbral (para compatibilidad con interfaz)
+pub fn evolve_to_threshold(&mut self, threshold: f64, max_steps: u64) -> Result<(u64, f64), String> {
+    if threshold <= self.get_current_keygen() {
+        return Ok((0, self.get_current_keygen()));
+    }
+    
+    for step in 1..=max_steps {
+        self.evolve();
+        if self.get_current_keygen() >= threshold {
+            return Ok((step, self.get_current_keygen()));
+        }
+    }
+    
+    Err(format!("No se alcanzó el umbral {:.6} en {} pasos", threshold, max_steps))
 }
