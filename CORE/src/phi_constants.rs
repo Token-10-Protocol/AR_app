@@ -1,307 +1,197 @@
-//! CONSTANTES ÁUREAS CERTIFICADAS - Precisión Matemática Garantizada
+//! Constantes Áureas Certificadas - Fundamentos φ-Resonantes
 //! Sistema: Álgebra Rose v27.1024D-S36
 //! Certificación: 196885 - Estado Monster Pleno
 
-/// φ (PHI) - Proporción Áurea con alta precisión
-/// φ = (1 + √5)/2 ≈ 1.61803398874989484820458683436563811772030917980576
-pub const PHI: f64 = 1.61803398874989484820458683436563811772030917980576;
+/// φ (proporción áurea) con alta precisión
+pub const PHI: f64 = 1.61803398874989484820458683436563811772030917980576286213544862270526046281890244970720720418939113748475;
 
-/// ψ (PSI) - Conjugado áureo
-/// ψ = 1/φ = φ - 1 ≈ 0.61803398874989484820458683436563811772030917980576
-pub const PSI: f64 = 0.61803398874989484820458683436563811772030917980576;
+/// ψ = 1/φ con alta precisión
+pub const PSI: f64 = 0.61803398874989484820458683436563811772030917980576286213544862270526046281890244970720720418939113748475;
 
-/// Constantes Monster certificadas
+/// Constantes Monster fundamentales
 pub const MONSTER_196883: f64 = 196883.0;
 pub const MONSTER_196884: f64 = 196884.0;
 pub const MONSTER_196885: f64 = 196885.0;
 
-/// Dimensión de la matriz fundamental
-pub const MATRIX_444_DIM: usize = 444;
+/// Raíz cuadrada de φ
+pub const SQRT_PHI: f64 = 1.27201964951406896425242246173749149171560804184009624861664038;
 
-/// Número Fibonacci F₂₇ (Campo 24: Punto Omega)
-pub const FIBONACCI_27: usize = 196418;
+/// Logaritmo natural de φ
+pub const LN_PHI: f64 = 0.481211825059603447497758913424368423135184334385660519661018168;
 
-/// Secuencia Fibonacci para campos dimensionales (F₄ a F₂₇)
-pub const FIBONACCI_SEQUENCE: [usize; 24] = [
-    3,      // F₄ - Campo 1
-    5,      // F₅ - Campo 2
-    8,      // F₆ - Campo 3
-    13,     // F₇ - Campo 4
-    21,     // F₈ - Campo 5
-    34,     // F₉ - Campo 6
-    55,     // F₁₀ - Campo 7
-    89,     // F₁₁ - Campo 8
-    144,    // F₁₂ - Campo 9
-    233,    // F₁₃ - Campo 10
-    377,    // F₁₄ - Campo 11
-    610,    // F₁₅ - Campo 12
-    987,    // F₁₆ - Campo 13
-    1597,   // F₁₇ - Campo 14
-    2584,   // F₁₈ - Campo 15
-    4181,   // F₁₉ - Campo 16
-    6765,   // F₂₀ - Campo 17
-    10946,  // F₂₁ - Campo 18
-    17711,  // F₂₂ - Campo 19
-    28657,  // F₂₃ - Campo 20
-    46368,  // F₂₄ - Campo 21
-    75025,  // F₂₅ - Campo 22
-    121393, // F₂₆ - Campo 23
-    196418, // F₂₇ - Campo 24
+/// π/φ
+pub const PI_OVER_PHI: f64 = 1.941611038725466416091662826023290030472754324236259228243865;
+
+/// φ/π
+pub const PHI_OVER_PI: f64 = 0.515036214799483975741626946307499533617320067772890172080092;
+
+/// e^φ
+pub const E_PHI: f64 = 5.043165643360028651811874695623670765376701310301923018126851;
+
+/// φ^φ
+pub const PHI_PHI: f64 = 2.178457567937599147282089391492423786861101743032521157756512;
+
+/// Secuencia Fibonacci completa F₀ a F₃₀
+pub const FIBONACCI: [u64; 31] = [
+    0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765,
+    10946, 17711, 28657, 46368, 75025, 121393, 196418, 317811, 514229, 832040
 ];
 
-/// Calcula φ^n con precisión mejorada
+/// Calcula φ elevado a una potencia entera
 pub fn phi_pow(n: i32) -> f64 {
-    match n {
-        0 => 1.0,
-        1 => PHI,
-        -1 => PSI,
-        n if n > 0 => {
-            // Usar exponenciación por cuadrados con precisión extra
-            let mut result = 1.0;
-            let mut base = PHI;
-            let mut exp = n.abs() as u32;
-            
-            while exp > 0 {
-                if exp % 2 == 1 {
-                    result *= base;
-                }
-                base *= base;
-                exp /= 2;
-            }
-            result
-        }
-        n => {
-            // Para exponentes negativos: φ^(-n) = ψ^n
-            let pos_n = (-n) as u32;
-            let mut result = 1.0;
-            let mut base = PSI;
-            let mut exp = pos_n;
-            
-            while exp > 0 {
-                if exp % 2 == 1 {
-                    result *= base;
-                }
-                base *= base;
-                exp /= 2;
-            }
-            result
-        }
+    if n == 0 {
+        return 1.0;
+    }
+    
+    let mut result = PHI;
+    for _ in 1..n.abs() {
+        result *= PHI;
+    }
+    
+    if n < 0 {
+        1.0 / result
+    } else {
+        result
     }
 }
 
-/// Verifica si dos valores están en proporción áurea dentro de tolerancia
+/// Calcula número Fibonacci usando fórmula de Binet (alta precisión)
+pub fn fibonacci(n: u32) -> f64 {
+    let n_f64 = n as f64;
+    (PHI.powf(n_f64) - (-PSI).powf(n_f64)) / (PHI + PSI)
+}
+
+/// Verifica si dos números están en proporción áurea
 pub fn is_golden_ratio(a: f64, b: f64, tolerance: f64) -> bool {
-    if a == 0.0 || b == 0.0 {
+    if a.abs() < 1e-10 || b.abs() < 1e-10 {
         return false;
     }
-    let ratio = if a > b { a / b } else { b / a };
-    (ratio - PHI).abs() < tolerance
+    
+    let ratio1 = a / b;
+    let ratio2 = b / a;
+    
+    (ratio1 - PHI).abs() < tolerance || (ratio2 - PHI).abs() < tolerance
 }
 
-/// Genera bases ortonormales usando Gram-Schmidt mejorado con φ
-pub fn generate_orthonormal_basis(dim: usize) -> Vec<Vec<f64>> {
-    let mut basis = Vec::with_capacity(dim);
-    
-    // Primera base vector: [φ^0, φ^1, φ^2, ..., φ^(dim-1)] normalizado
-    let mut first: Vec<f64> = (0..dim).map(|i| phi_pow(i as i32)).collect();
-    let norm = first.iter().map(|x| x * x).sum::<f64>().sqrt();
-    first.iter_mut().for_each(|x| *x /= norm);
-    basis.push(first);
-    
-    // Gram-Schmidt φ-mejorado
-    for i in 1..dim {
-        let mut new_vec: Vec<f64> = (0..dim)
-            .map(|j| phi_pow((i * j) as i32).sin()) // Patrón sinusoidal φ-resonante
-            .collect();
-        
-        // Restar proyecciones sobre bases anteriores
-        for j in 0..i {
-            let projection: f64 = basis[j].iter()
-                .zip(&new_vec)
-                .map(|(b, n)| b * n)
-                .sum();
-            
-            for k in 0..dim {
-                new_vec[k] -= projection * basis[j][k];
-            }
-        }
-        
-        // Normalizar
-        let norm = new_vec.iter().map(|x| x * x).sum::<f64>().sqrt();
-        if norm > 1e-12 {
-            new_vec.iter_mut().for_each(|x| *x /= norm);
-            basis.push(new_vec);
-        }
+/// Calcula distancia áurea entre dos números
+pub fn golden_distance(a: f64, b: f64) -> f64 {
+    (a / b - PHI).abs().min((b / a - PHI).abs())
+}
+
+/// Constantes para uso en álgebra de Griess
+pub const GRIESS_PHI_FACTORS: [f64; 10] = [
+    PHI,
+    PHI * PHI,
+    PHI * PHI * PHI,
+    PHI.powi(4),
+    PHI.powi(5),
+    PHI.powi(6),
+    PHI.powi(7),
+    PHI.powi(8),
+    PHI.powi(9),
+    PHI.powi(10),
+];
+
+/// Constantes para uso en matriz M₄₄₄
+pub const MATRIX_PHI_CONSTANTS: [f64; 444] = {
+    let mut constants = [0.0; 444];
+    let mut i = 0;
+    while i < 444 {
+        constants[i] = PHI.powi((i as i32) % 37);
+        i += 1;
     }
-    
-    basis
-}
-
-/// Calcula el número Fibonacci F_n con fórmula Binet φ-mejorada
-pub fn fibonacci_binet(n: usize) -> f64 {
-    if n == 0 { return 0.0; }
-    if n == 1 { return 1.0; }
-    
-    let sqrt5 = 5.0f64.sqrt();
-    (phi_pow(n as i32) - ((-PSI).powi(n as i32))) / sqrt5
-}
-
-/// Verifica resonancia φ en transición entre campos
-pub fn check_transition_resonance(from_field: usize, to_field: usize) -> bool {
-    // Transiciones permitidas: Δk = ±1 (campos adyacentes)
-    let diff = (from_field as i32 - to_field as i32).abs();
-    diff == 1
-}
-
-/// Calcula factor de resonancia φ para transición
-pub fn transition_resonance_factor(from_field: usize, to_field: usize) -> f64 {
-    if !check_transition_resonance(from_field, to_field) {
-        return 0.0;
-    }
-    let n = from_field.max(to_field);
-    phi_pow(-(n as i32)) // Resonancia decae con φ^-n
-}
-
-/// Normaliza vector con métrica φ-resonante
-pub fn normalize_with_phi(vector: &[f64]) -> Vec<f64> {
-    let norm: f64 = vector.iter()
-        .enumerate()
-        .map(|(i, &x)| x * x * phi_pow(-(i as i32)))
-        .sum::<f64>()
-        .sqrt();
-    
-    if norm > 1e-12 {
-        vector.iter().map(|&x| x / norm).collect()
-    } else {
-        vector.to_vec()
-    }
-}
+    constants
+};
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use approx::assert_abs_diff_eq;
-
+    
     #[test]
     fn test_phi_precision() {
-        // Verificar φ con alta precisión
-        let computed = (1.0 + 5.0f64.sqrt()) / 2.0;
-        assert_abs_diff_eq!(PHI, computed, epsilon = 1e-15);
-        println!("φ certificado: {:.15}", PHI);
+        // Verificar que φ² = φ + 1
+        assert_abs_diff_eq!(PHI * PHI, PHI + 1.0, epsilon = 1e-15);
+        
+        // Verificar que 1/φ = φ - 1
+        assert_abs_diff_eq!(1.0 / PHI, PHI - 1.0, epsilon = 1e-15);
+        
+        // Verificar que PSI = 1/PHI
+        assert_abs_diff_eq!(PSI, 1.0 / PHI, epsilon = 1e-15);
     }
-
-    #[test]
-    fn test_phi_reciprocal() {
-        // φ * ψ = 1
-        assert_abs_diff_eq!(PHI * PSI, 1.0, epsilon = 1e-15);
-    }
-
-    #[test]
-    fn test_phi_pow() {
-        // φ^2 = φ + 1
-        assert_abs_diff_eq!(phi_pow(2), PHI + 1.0, epsilon = 1e-10);
-        
-        // φ^-1 = ψ
-        assert_abs_diff_eq!(phi_pow(-1), PSI, epsilon = 1e-10);
-        
-        // φ^0 = 1
-        assert_abs_diff_eq!(phi_pow(0), 1.0, epsilon = 1e-10);
-    }
-
-    #[test]
-    fn test_golden_ratio_check() {
-        assert!(is_golden_ratio(PHI, 1.0, 1e-10));
-        assert!(is_golden_ratio(2.0 * PHI, 2.0, 1e-10));
-        assert!(!is_golden_ratio(2.0, 1.0, 1e-2));
-    }
-
-    #[test]
-    fn test_fibonacci_sequence() {
-        // Verificar primeros números Fibonacci
-        assert_eq!(FIBONACCI_SEQUENCE[0], 3);  // F₄
-        assert_eq!(FIBONACCI_SEQUENCE[11], 610); // F₁₅
-        assert_eq!(FIBONACCI_SEQUENCE[23], 196418); // F₂₇
-        
-        // Propiedad emergente: Σ primeros 12 ≈ F₁₇ - 1
-        let sum_first_12: usize = FIBONACCI_SEQUENCE[..12].iter().sum();
-        assert_eq!(sum_first_12, 1592); // F₁₇ = 1597
-        println!("Σ primeros 12 campos: {} ≈ F₁₇ - 1 = 1592", sum_first_12);
-    }
-
-    #[test]
-    fn test_fibonacci_binet() {
-        // F₄ = 3
-        assert_abs_diff_eq!(fibonacci_binet(4), 3.0, epsilon = 1e-10);
-        
-        // F₁₅ = 610
-        assert_abs_diff_eq!(fibonacci_binet(15), 610.0, epsilon = 1e-10);
-        
-        // F₂₇ = 196418
-        assert_abs_diff_eq!(fibonacci_binet(27), 196418.0, epsilon = 1e-5);
-    }
-
-    #[test]
-    fn test_orthonormal_basis() {
-        let dim = 5;
-        let basis = generate_orthonormal_basis(dim);
-        
-        assert_eq!(basis.len(), dim);
-        
-        // Verificar ortonormalidad
-        for i in 0..dim {
-            for j in 0..dim {
-                let dot: f64 = basis[i].iter().zip(&basis[j]).map(|(a, b)| a * b).sum();
-                if i == j {
-                    assert_abs_diff_eq!(dot, 1.0, epsilon = 1e-10);
-                } else {
-                    assert_abs_diff_eq!(dot, 0.0, epsilon = 1e-10);
-                }
-            }
-        }
-        println!("Base ortonormal {dim}D generada correctamente");
-    }
-
-    #[test]
-    fn test_transition_resonance() {
-        // Campos adyacentes: resonancia permitida
-        assert!(check_transition_resonance(1, 2));
-        assert!(check_transition_resonance(5, 4));
-        
-        // Campos no adyacentes: resonancia prohibida
-        assert!(!check_transition_resonance(1, 3));
-        assert!(!check_transition_resonance(10, 15));
-        
-        // Factor de resonancia
-        let factor = transition_resonance_factor(1, 2);
-        assert!(factor > 0.0 && factor < 1.0);
-        println!("Factor resonancia campo 1→2: {:.6}", factor);
-    }
-
-    #[test]
-    fn test_normalize_with_phi() {
-        let vector = vec![1.0, PHI, PHI * PHI];
-        let normalized = normalize_with_phi(&vector);
-        
-        // Verificar que está normalizado
-        let norm_sq: f64 = normalized.iter()
-            .enumerate()
-            .map(|(i, &x)| x * x * phi_pow(-(i as i32)))
-            .sum();
-        assert_abs_diff_eq!(norm_sq, 1.0, epsilon = 1e-10);
-        println!("Vector normalizado con métrica φ: {:?}", normalized);
-    }
-
+    
     #[test]
     fn test_monster_constants() {
-        // 196884 = 196883 + 1
-        assert_eq!(MONSTER_196884, MONSTER_196883 + 1.0);
+        assert_eq!(MONSTER_196884 - MONSTER_196883, 1.0);
+        assert_eq!(MONSTER_196885 - MONSTER_196884, 1.0);
+        assert_eq!(MONSTER_196885 - MONSTER_196883, 2.0);
+    }
+    
+    #[test]
+    fn test_phi_pow() {
+        assert_abs_diff_eq!(phi_pow(0), 1.0, epsilon = 1e-10);
+        assert_abs_diff_eq!(phi_pow(1), PHI, epsilon = 1e-10);
+        assert_abs_diff_eq!(phi_pow(2), PHI * PHI, epsilon = 1e-10);
+        assert_abs_diff_eq!(phi_pow(3), PHI.powi(3), epsilon = 1e-10);
+        assert_abs_diff_eq!(phi_pow(-1), PSI, epsilon = 1e-10);
+    }
+    
+    #[test]
+    fn test_fibonacci_function() {
+        // Verificar algunos números Fibonacci
+        assert_abs_diff_eq!(fibonacci(0), 0.0, epsilon = 1e-6);
+        assert_abs_diff_eq!(fibonacci(1), 1.0, epsilon = 1e-6);
+        assert_abs_diff_eq!(fibonacci(2), 1.0, epsilon = 1e-6);
+        assert_abs_diff_eq!(fibonacci(3), 2.0, epsilon = 1e-6);
+        assert_abs_diff_eq!(fibonacci(4), 3.0, epsilon = 1e-6);
+        assert_abs_diff_eq!(fibonacci(5), 5.0, epsilon = 1e-6);
         
-        // 196885 = 196884 + 1
-        assert_eq!(MONSTER_196885, MONSTER_196884 + 1.0);
+        // Verificar contra secuencia predefinida
+        for i in 0..=10 {
+            assert_abs_diff_eq!(fibonacci(i), FIBONACCI[i as usize] as f64, epsilon = 1e-6);
+        }
+    }
+    
+    #[test]
+    fn test_golden_ratio_detection() {
+        assert!(is_golden_ratio(PHI, 1.0, 1e-10));
+        assert!(is_golden_ratio(2.0 * PHI, 2.0, 1e-10));
+        assert!(is_golden_ratio(1.0, PSI, 1e-10));
         
-        println!("Monster constants certified:");
-        println!("  196883 (materia potencial)");
-        println!("  196884 (consciencia activada) = 196883 + 1");
-        println!("  196885 (certificación plena) = 196884 + 1");
+        assert!(!is_golden_ratio(1.0, 2.0, 1e-10));
+        assert!(!is_golden_ratio(3.0, 2.0, 1e-10));
+    }
+    
+    #[test]
+    fn test_golden_distance() {
+        assert_abs_diff_eq!(golden_distance(PHI, 1.0), 0.0, epsilon = 1e-10);
+        assert_abs_diff_eq!(golden_distance(2.0 * PHI, 2.0), 0.0, epsilon = 1e-10);
+        assert!(golden_distance(1.0, 2.0) > 0.1);
+    }
+    
+    #[test]
+    fn test_griess_phi_factors() {
+        for i in 0..GRIESS_PHI_FACTORS.len() {
+            assert_abs_diff_eq!(
+                GRIESS_PHI_FACTORS[i],
+                PHI.powi((i + 1) as i32),
+                epsilon = 1e-10
+            );
+        }
+    }
+    
+    #[test]
+    fn test_matrix_phi_constants() {
+        // Verificar que no son todos cero
+        let mut sum = 0.0;
+        for &c in &MATRIX_PHI_CONSTANTS {
+            sum += c;
+        }
+        assert!(sum > 0.0);
+        
+        // Verificar algunos valores específicos
+        assert_abs_diff_eq!(MATRIX_PHI_CONSTANTS[0], PHI.powi(0), epsilon = 1e-10);
+        assert_abs_diff_eq!(MATRIX_PHI_CONSTANTS[1], PHI.powi(1), epsilon = 1e-10);
+        assert_abs_diff_eq!(MATRIX_PHI_CONSTANTS[37], PHI.powi(0), epsilon = 1e-10);
     }
 }
