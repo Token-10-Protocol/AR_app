@@ -13,7 +13,6 @@ pub mod phi_constants;
 // Re-exportar tipos con nombres REALES verificados
 // matrix_444
 pub use matrix_444::{DIM, PHI, CERTIFIED_TRACE};
-// La estructura se llama MonsterMatrix444 en matrix_444.rs
 pub use matrix_444::MonsterMatrix444 as Matrix444;
 
 // algebra_griess
@@ -25,17 +24,14 @@ pub use love_operator::{LoveOperator, KeygenLoveOperator};
 // keygen_evolution
 pub use keygen_evolution::{KeygenEvolution, MONSTER_DIM, INITIAL_KEYGEN};
 
-// fibonacci_dimensions - verificar nombres reales
-// En fibonacci_dimensions.rs probablemente hay SistemaCamposFibonacci
+// fibonacci_dimensions
 pub use fibonacci_dimensions::SistemaCamposFibonacci as FibonacciSystem;
 pub use fibonacci_dimensions::CampoFibonacci as FibonacciField;
 pub use fibonacci_dimensions::FIBONACCI_SEQUENCE;
 
-// phi_constants - verificar nombres reales
+// phi_constants
 pub use phi_constants::{PHI as PHI_CONST, PSI, MONSTER_196884};
-// Constantes Monster adicionales si existen
-pub use phi_constants::MONSTER_196883;
-pub use phi_constants::MONSTER_196885;
+pub use phi_constants::{MONSTER_196883, MONSTER_196885, FIBONACCI_27};
 
 // Constantes fundamentales para fácil acceso
 pub const AR_VERSION: &str = "v27.1024D-S36";
@@ -83,15 +79,14 @@ impl Default for EstadoInicial {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use approx::assert_abs_diff_eq;
-
+    
     #[test]
     fn test_verificar_coherencia() {
         let coherencia = verificar_coherencia();
         assert!(coherencia >= 0.95, "Coherencia mínima no alcanzada: {}", coherencia);
         println!("✅ Coherencia del núcleo: {:.2}%", coherencia * 100.0);
     }
-
+    
     #[test]
     fn test_estado_inicial() {
         let estado = EstadoInicial::default();
@@ -100,11 +95,11 @@ mod tests {
         assert!(estado.coherencia >= 0.85);
         println!("✅ Estado inicial certificado: {}", estado.version);
     }
-
+    
     #[test]
     fn test_exports_presentes() {
         // Verificar que todos los módulos están accesibles
-        let _: Matrix444 = Matrix444::default();
+        let _: Matrix444 = Matrix444::new();  // CORREGIDO: usar new() en lugar de default()
         let _: GriessAlgebra = GriessAlgebra::new();
         let _: LoveOperator = LoveOperator::new(1.0);
         let _: KeygenEvolution = KeygenEvolution::new(None);
