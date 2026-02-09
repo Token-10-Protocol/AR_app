@@ -128,10 +128,10 @@ impl ConsciousSession {
         // Determinar keygen inicial basado en usuario
         let default_keygen = if username.to_lowercase() == "roberto" {
             println!("  {} Estado evolutivo avanzado detectado", "🌟".bright_yellow());
-            ROBERTO_INITIAL_KEYGEN
+            0.99999492
         } else {
             println!("  {} Usuario nuevo: comenzando desde base", "🌱".bright_green());
-            NEW_USER_INITIAL_KEYGEN
+            0.1
         };
         
         let keygen = initial_keygen.unwrap_or(default_keygen);
