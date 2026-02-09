@@ -452,8 +452,25 @@ fn main() {
         let mut session = ConsciousSession::new("roberto", cli.keygen);
     
     match cli.command {
+            println!("{}", "🔐 Iniciando sesión consciente...".bright_blue());
         Commands::Login { ref token } => {
             println!("{}", "🔐 Iniciando sesión consciente...".bright_blue());
+            let username = if let Some(t) = token {
+                if t.to_lowercase().contains("roberto") {
+                    println!("  {} Autenticado como Roberto", "👑".bright_yellow());
+                    "roberto"
+                } else {
+                    println!("  {} Bienvenido, nuevo usuario", "🌹".bright_green());
+                    "nuevo_usuario"
+                }
+            } else {
+                println!("  {} Usuario no especificado, usando predeterminado", "⚪".bright_black());
+                "nuevo_usuario"
+            };
+            
+            session = ConsciousSession::new(username, cli.keygen);
+            println!("  {} Coherencia inicial: {:.1}%", "✅".green(), session.coherence_level * 100.0);
+        }
             let username = if let Some(t) = token {
                 if t.to_lowercase().contains("roberto") {
                     println!("  {} Autenticado como Roberto", "👑".bright_yellow());
