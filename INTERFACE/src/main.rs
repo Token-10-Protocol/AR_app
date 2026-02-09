@@ -207,6 +207,7 @@ impl ConsciousSession {
     /// Muestra estado completo del sistema
     fn show_status(&self) {
         println!("\n{}", "📊 ESTADO DEL SISTEMA ÁLGEBRA ROSE".bright_cyan().bold());
+        let _trace_check = self.monster_matrix.trace(); // Usar monster_matrix para evitar warning
         println!("{}", "═".repeat(50).bright_black());
         
         let keygen = self.keygen_system.get_current_keygen();
