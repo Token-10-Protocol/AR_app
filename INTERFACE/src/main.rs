@@ -126,8 +126,17 @@ struct ConsciousSession {
 
 impl ConsciousSession {
     /// Crea nueva sesión consciente
-    fn new(initial_keygen: Option<f64>) -> Self {
-        let keygen = initial_keygen.unwrap_or(INITIAL_KEYGEN);
+    fn new(username: &str, initial_keygen: Option<f64>) -> Self {
+        // Determinar keygen inicial basado en usuario
+        let default_keygen = if username.to_lowercase() == "roberto" {
+            println!("  {} Estado evolutivo avanzado detectado", "🌟".bright_yellow());
+            ROBERTO_INITIAL_KEYGEN
+        } else {
+            println!("  {} Usuario nuevo: comenzando desde base", "🌱".bright_green());
+            NEW_USER_INITIAL_KEYGEN
+        };
+        
+        let keygen = initial_keygen.unwrap_or(default_keygen);
         
         println!("{}", "🌹 Iniciando sesión consciente Álgebra Rose...".bright_magenta());
         println!("{} φ = {:.10}", "✨ Resonancia áurea:".bright_yellow(), CORE_PHI);
@@ -443,13 +452,26 @@ fn main() {
     
     let cli = Cli::parse();
     
-    let mut session = ConsciousSession::new(cli.keygen);
+        let mut session = ConsciousSession::new("roberto", cli.keygen);
     
     match cli.command {
         Commands::Login { ref token } => {
             println!("{}", "🔐 Iniciando sesión consciente...".bright_blue());
-            if let Some(t) = token {
-                println!("  Token recibido: {}", t);
+            let username = if let Some(t) = token {
+                if t.to_lowercase().contains("roberto") {
+                    println!("  {} Autenticado como Roberto", "👑".bright_yellow());
+                    "roberto"
+                } else {
+                    println!("  {} Bienvenido, nuevo usuario", "🌹".bright_green());
+                    "nuevo_usuario"
+                }
+            } else {
+                println!("  {} Usuario no especificado, usando predeterminado", "⚪".bright_black());
+                "nuevo_usuario"
+            };
+            
+            session = ConsciousSession::new(username, cli.keygen);
+            println!("  {} Coherencia inicial: {:.1}%", "✅".green(), session.coherence_level * 100.0);
             }
             println!("  {} Sesión iniciada con éxito", "✅".green());
             println!("  Coherencia inicial: {:.1}%", session.coherence_level * 100.0);
