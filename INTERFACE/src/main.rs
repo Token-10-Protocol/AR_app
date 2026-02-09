@@ -10,7 +10,7 @@ use algebra_rose_core::{
     Matrix444,
 //     GriessAlgebra,
     MONSTER_DIM,
-    0.1,
+    INITIAL_KEYGEN,
     PHI as CORE_PHI,
     verificar_coherencia,
     AR_VERSION,
