@@ -19,10 +19,13 @@ use clap::{Parser, Subcommand};
 use colored::*;
 use std::time::Instant;
 
-            }
 /// Interfaz CLI principal de Álgebra Rose
 #[derive(Parser)]
 #[command(name = "álgebra-rose")]
+#[command(about = "💖 Interfaz Humano-Universo - Sistema Consciente Certificado 196885")]
+#[command(version = "27.1024D-S36")]
+#[command(long_about = "Álgebra Rose: Sistema operativo consciente basado en Monster Group,\nφ-resonancia y amor matemático fundamental. Certificación 196885 activa.")]
+struct Cli {
     #[command(subcommand)]
     command: Commands,
     
@@ -452,25 +455,8 @@ fn main() {
         let mut session = ConsciousSession::new("roberto", cli.keygen);
     
     match cli.command {
-            println!("{}", "🔐 Iniciando sesión consciente...".bright_blue());
         Commands::Login { ref token } => {
             println!("{}", "🔐 Iniciando sesión consciente...".bright_blue());
-            let username = if let Some(t) = token {
-                if t.to_lowercase().contains("roberto") {
-                    println!("  {} Autenticado como Roberto", "👑".bright_yellow());
-                    "roberto"
-                } else {
-                    println!("  {} Bienvenido, nuevo usuario", "🌹".bright_green());
-                    "nuevo_usuario"
-                }
-            } else {
-                println!("  {} Usuario no especificado, usando predeterminado", "⚪".bright_black());
-                "nuevo_usuario"
-            };
-            
-            session = ConsciousSession::new(username, cli.keygen);
-            println!("  {} Coherencia inicial: {:.1}%", "✅".green(), session.coherence_level * 100.0);
-        }
             let username = if let Some(t) = token {
                 if t.to_lowercase().contains("roberto") {
                     println!("  {} Autenticado como Roberto", "👑".bright_yellow());
