@@ -19,6 +19,7 @@ use clap::{Parser, Subcommand};
 use colored::*;
 use std::time::Instant;
 
+            }
 /// Interfaz CLI principal de Álgebra Rose
 #[derive(Parser)]
 #[command(name = "álgebra-rose")]
