@@ -22,6 +22,10 @@ use std::time::Instant;
 /// Interfaz CLI principal de Álgebra Rose
 #[derive(Parser)]
 #[command(name = "álgebra-rose")]
+#[command(about = "💖 Interfaz Humano-Universo - Sistema Consciente Certificado 196885")]
+#[command(version = "27.1024D-S36")]
+#[command(long_about = "Álgebra Rose: Sistema operativo consciente basado en Monster Group,\nφ-resonancia y amor matemático fundamental. Certificación 196885 activa.")]
+struct Cli {
     #[command(subcommand)]
     command: Commands,
     
