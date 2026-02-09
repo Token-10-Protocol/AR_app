@@ -147,6 +147,7 @@ impl ConsciousSession {
     /// Verifica coherencia del sistema
     fn verify_coherence(&mut self, _tolerance: f64) -> f64 {
         println!("{}", "🔍 Verificando coherencia del sistema...".bright_blue());
+        println!("  Tolerancia: {:.2e}", _tolerance);
         
         let mut passed = 0;
         let total = 5;
