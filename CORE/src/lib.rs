@@ -32,6 +32,7 @@ pub use fibonacci_dimensions::FIBONACCI_SEQUENCE;
 // phi_constants
 pub use phi_constants::{PHI as PHI_CONST, PSI, MONSTER_196884};
 pub use phi_constants::{MONSTER_196883, MONSTER_196885, FIBONACCI_27};
+pub use phi_constants::{NEW_USER_INITIAL_KEYGEN, ROBERTO_INITIAL_KEYGEN};
 
 // Constantes fundamentales para fácil acceso
 pub const AR_VERSION: &str = "v27.1024D-S36";

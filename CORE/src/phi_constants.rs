@@ -178,3 +178,9 @@ mod tests {
         assert_eq!(FIBONACCI_SEQUENCE[23], FIBONACCI_27);
     }
 }
+
+/// Keygen inicial para usuarios nuevos (comienzo básico)
+pub const NEW_USER_INITIAL_KEYGEN: f64 = 0.1;
+
+/// Keygen para Roberto (estado evolutivo avanzado)
+pub const ROBERTO_INITIAL_KEYGEN: f64 = MONSTER_196883 / MONSTER_196884;
