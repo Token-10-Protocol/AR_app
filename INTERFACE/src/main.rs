@@ -242,7 +242,7 @@ impl ConsciousSession {
             println!();
             
             if let Some(&highest) = fields_active.last() {
-                let dimension = self.fibonacci_system.get_field_dimension(*highest);
+                let dimension = self.fibonacci_system.get_field_dimension(highest);
                 println!("  Campo más alto: {} ({}D)", highest, dimension);
             }
         }
