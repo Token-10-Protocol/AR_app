@@ -15,7 +15,7 @@ use algebra_rose_core::{
     verificar_coherencia,
     AR_VERSION,
     CERTIFICATION,
-use std::time::Instant;;
+use std::time::Instant;
 
 /// Interfaz CLI principal de Álgebra Rose
 #[derive(Parser)]
