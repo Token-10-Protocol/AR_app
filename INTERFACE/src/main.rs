@@ -15,9 +15,6 @@ use algebra_rose_core::{
     verificar_coherencia,
     AR_VERSION,
     CERTIFICATION,
-};
-use clap::{Parser, Subcommand};
-use colored::*;
 use std::time::Instant;
 
 /// Interfaz CLI principal de Álgebra Rose
