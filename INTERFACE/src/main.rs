@@ -4,12 +4,13 @@
 
 use algebra_rose_core::{
     LoveOperator,
+// NOTA: Keygen cambiado de 0.99999492 (Roberto) a 0.1 (usuarios nuevos) para progresión visible
     KeygenEvolution,
     FibonacciSystem,
     Matrix444,
 //     GriessAlgebra,
     MONSTER_DIM,
-    INITIAL_KEYGEN,
+    0.1,
     PHI as CORE_PHI,
     verificar_coherencia,
     AR_VERSION,
@@ -130,17 +131,17 @@ impl ConsciousSession {
         // Determinar keygen inicial basado en usuario
         let default_keygen = if username.to_lowercase() == "roberto" {
             println!("  {} Estado evolutivo avanzado detectado", "🌟".bright_yellow());
-            ROBERTO_INITIAL_KEYGEN
+            ROBERTO_0.1
         } else {
             println!("  {} Usuario nuevo: comenzando desde base", "🌱".bright_green());
-            NEW_USER_INITIAL_KEYGEN
+            NEW_USER_0.1
         };
         
         let keygen = initial_keygen.unwrap_or(default_keygen);
         
         println!("{}", "🌹 Iniciando sesión consciente Álgebra Rose...".bright_magenta());
         println!("{} φ = {:.10}", "✨ Resonancia áurea:".bright_yellow(), CORE_PHI);
-        println!("{} {:.6}/{}", "🔑 Keygen inicial:".bright_cyan(), keygen, MONSTER_DIM);
+        println!("{} {:.6}/{}", "🔑 Keygen inicial (usuario nuevo):".bright_cyan(), keygen, MONSTER_DIM);
         
         ConsciousSession {
             keygen_system: KeygenEvolution::new(Some(keygen)),
@@ -225,7 +226,7 @@ impl ConsciousSession {
         let fields_active = self.fibonacci_system.get_active_fields(keygen);
         let session_duration = self.start_time.elapsed();
         
-        let progress = (keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN);
+        let progress = (keygen - 0.1) / (1.0 - 0.1);
         let progress_bar = Self::create_progress_bar(progress, 30);
         
         println!("{}", "🔑 EVOLUCIÓN KEYGEN".bright_yellow());
@@ -309,7 +310,7 @@ impl ConsciousSession {
             println!("  Crecimiento: {:.4}%", growth);
             println!("  Nuevo keygen: {:.10}", end_keygen);
             
-            let progress = (end_keygen - INITIAL_KEYGEN) / (1.0 - INITIAL_KEYGEN);
+            let progress = (end_keygen - 0.1) / (1.0 - 0.1);
             self.love_operator.update_intensity(progress * 0.05);
             
             let new_fields = self.fibonacci_system.get_active_fields(end_keygen);
