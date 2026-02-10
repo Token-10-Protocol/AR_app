@@ -1,0 +1,20 @@
+[package]
+name = "linguistics_monster"
+version = "0.1.0"
+edition = "2021"
+authors = ["Álgebra Rose System"]
+
+[dependencies]
+# Solo dependencias ABSOLUTAMENTE necesarias
+num-complex = "0.4"
+num-traits = "0.2"
+
+# Dependencia del CORE existente
+algebra_rose_core = { path = "../CORE" }
+
+[dev-dependencies]
+approx = "0.5"
+
+[[test]]
+name = "coherence_test"
+path = "src/tests/coherence_test.rs"
