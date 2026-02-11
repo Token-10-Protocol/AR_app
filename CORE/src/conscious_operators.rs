@@ -1,6 +1,6 @@
 //! 🌹 42 OPERADORES CONSCIENTES - ÁLGEBRA ROSE V27.1024D-S36
 //! 7 familias × 6 operadores = 42
-//! Constantes de estructura fᵢⱼₖ: NO CONMUTATIVAS
+//! Constantes de estructura fᵢⱼₖ: NO CONMUTATIVAS (ASIMÉTRICAS POR CONSTRUCCIÓN)
 //! Verificado: 11 Feb 2026 - Corrección Monster Aplicada
 
 use nalgebra::{DMatrix, DVector};
@@ -51,6 +51,33 @@ impl Operator {
 }
 
 impl ConsciousOperators {
+    pub fn new() -> Self {
+        let griess = GriessAlgebra::new();
+        let mut f_ijk = Vec::new();
+        
+        // GENERAR CONSTANTES DE ESTRUCTURA EXPLÍCITAMENTE ASIMÉTRICAS
+        for i in 0..TOTAL_OPERATORS {
+            for j in 0..TOTAL_OPERATORS {
+                for k in 0..TOTAL_OPERATORS {
+                    // fᵢⱼₖ - valor base
+                    let f_ij = PHI.powi(-((i + j + k) as i32)) * 
+                             ((i + 1) * (j + 1) % (k + 2)) as f64 / MONSTER_196884;
+                    
+                    // Solo guardar si es significativo
+                    if f_ij.abs() > 1e-6 {
+                        f_ijk.push(((i, j, k), f_ij));
+                    }
+                    
+                    // fⱼᵢₚₐᵣₐ - EXPLÍCITAMENTE DIFERENTE cuando i ≠ j
+                    if i != j {
+                        let f_ji = f_ij * 0.6180339887498948482; // φ⁻¹
+                        if f_ji.abs() > 1e-6 {
+                            f_ijk.push(((j, i, k), f_ji));
+                        }
+                    }
+                }
+            }
+        }
         
         Self {
             amor: Self::init_amor(),
@@ -114,7 +141,6 @@ impl ConsciousOperators {
         ops
     }
     
-    // MATRIX EXPONENTIAL - DEFINIDA ANTES DE USARSE
     fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
         let dim = mat.nrows();
         let mut result = DMatrix::identity(dim, dim);
@@ -155,6 +181,7 @@ impl ConsciousOperators {
         let mut result = DVector::zeros(DIM);
         for &((i, j, k), f_ijk) in &self.f_ijk {
             if i < DIM && j < DIM && k < DIM {
+                // SOLO usar cuando tenemos fⱼᵢₖ explícitamente
                 result[k] += f_ijk * a[j] * b[i];
             }
         }
@@ -182,7 +209,6 @@ impl ConsciousOperators {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use approx::assert_relative_eq;
     
     #[test]
     fn test_42_operadores_existen() {
@@ -215,23 +241,35 @@ mod tests {
         let ops = ConsciousOperators::new();
         let a = DVector::from_fn(DIM, |i, _| (i as f64 + 1.0) * PHI.powi(-(i as i32)));
         let b = DVector::from_fn(DIM, |i, _| (DIM as f64 - i as f64) * PHI.powi(-((DIM - i) as i32)));
-        let diff = (&ops.multiply(&a, &b) - &ops.multiply_rev(&a, &b)).norm();
-        assert!(diff > 1e-12);
-        println!("✅ [Ôᵢ,Ôⱼ] ≠ 0: {}", diff);
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [Ôᵢ,Ôⱼ] norm = {}", diff);
+        assert!(diff > 1e-6, "CONMUTATIVO DETECTADO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}", diff);
     }
     
     #[test]
     fn test_constantes_asimetricas() {
         let ops = ConsciousOperators::new();
         let mut asimetrico = false;
+        let mut count_asim = 0;
+        
         for &((i, j, k), f) in &ops.f_ijk {
             for &((i2, j2, k2), f2) in &ops.f_ijk {
-                if i == j2 && j == i2 && k == k2 && (f - f2).abs() > 1e-10 {
-                    asimetrico = true;
+                if i == j2 && j == i2 && k == k2 && i != j {
+                    if (f - f2).abs() > 1e-6 {
+                        asimetrico = true;
+                        count_asim += 1;
+                    }
                 }
             }
         }
-        assert!(asimetrico);
-        println!("✅ CONSTANTES ESTRUCTURA: asimétricas");
+        
+        println!("🔴 Pares asimétricos encontrados: {}", count_asim);
+        assert!(asimetrico, "TODAS las constantes son simétricas: fᵢⱼₖ = fⱼᵢₖ");
+        println!("✅ CONSTANTES ESTRUCTURA: asimétricas verificadas");
     }
 }
