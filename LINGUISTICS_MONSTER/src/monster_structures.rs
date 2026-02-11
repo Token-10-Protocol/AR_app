@@ -2,6 +2,7 @@
 //! PRINCIPIO: No asignar τ, extraer τ naturales de subestructuras
 
 use num_complex::Complex64;
+use num_complex::ComplexFloat; // Para .abs(), .norm(), etc.
 use std::error::Error;
 use std::fmt;
 
