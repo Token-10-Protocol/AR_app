@@ -432,3 +432,7 @@ pub fn tau_natural(palabra: &str) -> Result<f64, ErrorLinguistica> {
         Ok(tau % 1.0)
     }
 }
+
+// Agregar al principio del archivo, después de los otros imports
+mod parametric_phonetics;
+pub use parametric_phonetics::*;
