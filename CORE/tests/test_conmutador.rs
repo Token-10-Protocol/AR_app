@@ -16,9 +16,12 @@ mod tests {
         
         let ab = algebra.multiply(&amor, &amour);
         let ba = algebra.multiply_rev(&amor, &amour);
-        let diferencia = (ab - ba).norm();
         
-        assert_ne!(ab, ba);
+        // Calcular diferencia SIN mover los vectores
+        let diferencia = (&ab - &ba).norm();
+        
+        // Comparar usando referencias (no mueve)
+        assert!(!ab.approx_eq(&ba, 1e-6));
         assert!(diferencia > 0.001);
         
         println!("✅ [amor,amour] ≠ 0: {}", diferencia);
