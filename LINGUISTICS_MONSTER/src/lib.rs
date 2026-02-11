@@ -20,9 +20,9 @@ pub use monster_structures::{
 pub const PHI_INV_MOD_1: f64 = 0.6180339887498948; // φ⁻¹ mod 1 ≈ 0.618
 pub const TOLERANCIA_TAU: f64 = 1e-6; // Tolerancia para comparaciones
 
-// Módulos de tests (solo en modo test)
+// Tests
 #[cfg(test)]
-mod tests {
-    // Esto incluirá automáticamente coherence_test.rs y multilingual_test.rs
-    // si están en src/tests/
-}
+mod coherence_test;
+
+#[cfg(test)]
+mod multilingual_test;
