@@ -8,9 +8,6 @@ use num_complex::Complex64;
 use crate::phi_constants::PHI;
 use crate::algebra_griess::GriessAlgebra;
 
-// ============================================================
-// CONSTANTES FUNDAMENTALES
-// ============================================================
 pub const NUM_FAMILIES: usize = 7;
 pub const OPS_PER_FAMILY: usize = 6;
 pub const TOTAL_OPERATORS: usize = 42;
@@ -18,9 +15,6 @@ pub const MONSTER_196883: f64 = 196883.0;
 pub const MONSTER_196884: f64 = 196884.0;
 pub const DIM: usize = 444;
 
-// ============================================================
-// 7 FAMILIAS DE 6 OPERADORES - DECLARACIÓN
-// ============================================================
 #[derive(Debug, Clone)]
 pub struct ConsciousOperators {
     pub amor: [Operator; 6],
@@ -34,9 +28,6 @@ pub struct ConsciousOperators {
     pub griess: GriessAlgebra,
 }
 
-// ============================================================
-// OPERADOR INDIVIDUAL
-// ============================================================
 #[derive(Debug, Clone)]
 pub struct Operator {
     pub index: usize,
@@ -59,9 +50,6 @@ impl Operator {
     }
 }
 
-// ============================================================
-// IMPLEMENTACIÓN PRINCIPAL - TODO DENTRO DE IMPL
-// ============================================================
 impl ConsciousOperators {
     pub fn new() -> Self {
         let griess = GriessAlgebra::new();
@@ -92,9 +80,6 @@ impl ConsciousOperators {
         }
     }
     
-    // ========================================================
-    // INICIALIZADORES POR FAMILIA
-    // ========================================================
     fn init_amor() -> [Operator; 6] {
         let names = ["Â₁", "Â₂", "Â₃", "Â₄", "Â₅", "Â₆"];
         let mut ops = [(); 6].map(|_| Operator::new(0, "Amor", ""));
@@ -138,100 +123,13 @@ impl ConsciousOperators {
     }
     
     fn init_manifestacion() -> [Operator; 6] {
-
-    // ========================================================
-    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
-    // ========================================================
-    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
-        let dim = mat.nrows();
-        let mut result = DMatrix::identity(dim, dim);
-        let mut term = DMatrix::identity(dim, dim);
-        let mut factorial = 1.0;
-        
-        for n in 1..10 {
-            factorial *= n as f64;
-            term = term * mat;
-            result = result + term.scale(1.0 / factorial);
-        }
-        result
-    }
         let names = ["M̂₁", "M̂₂", "M̂₃", "M̂₄", "M̂₅", "M̂₆"];
-
-    // ========================================================
-    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
-    // ========================================================
-    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
-        let dim = mat.nrows();
-        let mut result = DMatrix::identity(dim, dim);
-        let mut term = DMatrix::identity(dim, dim);
-        let mut factorial = 1.0;
-        
-        for n in 1..10 {
-            factorial *= n as f64;
-            term = term * mat;
-            result = result + term.scale(1.0 / factorial);
-        }
-        result
-    }
         let mut ops = [(); 6].map(|_| Operator::new(0, "Manifestación", ""));
-
-    // ========================================================
-    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
-    // ========================================================
-    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
-        let dim = mat.nrows();
-        let mut result = DMatrix::identity(dim, dim);
-        let mut term = DMatrix::identity(dim, dim);
-        let mut factorial = 1.0;
-        
-        for n in 1..10 {
-            factorial *= n as f64;
-            term = term * mat;
-            result = result + term.scale(1.0 / factorial);
-        }
-        result
-    }
         for i in 0..6 { ops[i] = Operator::new(i + 36, "Manifestación", names[i]); }
-
-    // ========================================================
-    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
-    // ========================================================
-    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
-        let dim = mat.nrows();
-        let mut result = DMatrix::identity(dim, dim);
-        let mut term = DMatrix::identity(dim, dim);
-        let mut factorial = 1.0;
-        
-        for n in 1..10 {
-            factorial *= n as f64;
-            term = term * mat;
-            result = result + term.scale(1.0 / factorial);
-        }
-        result
-    }
         ops
-
-    // ========================================================
-    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
-    // ========================================================
-    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
-        let dim = mat.nrows();
-        let mut result = DMatrix::identity(dim, dim);
-        let mut term = DMatrix::identity(dim, dim);
-        let mut factorial = 1.0;
-        
-        for n in 1..10 {
-            factorial *= n as f64;
-            term = term * mat;
-            result = result + term.scale(1.0 / factorial);
-        }
-        result
     }
-    }
-
-    // ========================================================
-    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
-    // ========================================================
+    
+    // MATRIX EXPONENTIAL - DEFINIDA ANTES DE USARSE
     fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
         let dim = mat.nrows();
         let mut result = DMatrix::identity(dim, dim);
@@ -246,9 +144,6 @@ impl ConsciousOperators {
         result
     }
     
-    // ========================================================
-    // OPERADOR ROBERTO
-    // ========================================================
     pub fn operador_roberto(&self, thetas: &[f64; TOTAL_OPERATORS]) -> DMatrix<Complex64> {
         let mut result = DMatrix::identity(DIM, DIM);
         
@@ -261,13 +156,6 @@ impl ConsciousOperators {
         result
     }
     
-    // ========================================================
-    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
-    // ========================================================
-    
-    // ========================================================
-    // PRODUCTO NO CONMUTATIVO
-    // ========================================================
     pub fn multiply(&self, a: &DVector<f64>, b: &DVector<f64>) -> DVector<f64> {
         let mut result = DVector::zeros(DIM);
         for &((i, j, k), f_ijk) in &self.f_ijk {
@@ -292,9 +180,6 @@ impl ConsciousOperators {
         self.multiply(a, b) - self.multiply_rev(a, b)
     }
     
-    // ========================================================
-    // UTILIDADES
-    // ========================================================
     pub fn get_operator(&self, index: usize) -> &Operator {
         match index {
             0..=5 => &self.amor[index],
@@ -309,9 +194,6 @@ impl ConsciousOperators {
     }
 }
 
-// ============================================================
-// TESTS
-// ============================================================
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -368,7 +250,3 @@ mod tests {
         println!("✅ CONSTANTES ESTRUCTURA: asimétricas");
     }
 }
-
-    // ========================================================
-    // MATRIX EXPONENTIAL - SIN MOVES MÚLTIPLES
-    // ========================================================
