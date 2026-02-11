@@ -177,16 +177,6 @@ impl ConsciousOperators {
         result
     }
     
-    pub fn multiply_rev(&self, a: &DVector<f64>, b: &DVector<f64>) -> DVector<f64> {
-        let mut result = DVector::zeros(DIM);
-        for &((i, j, k), f_ijk) in &self.f_ijk {
-            if i < DIM && j < DIM && k < DIM {
-                // SOLO usar cuando tenemos fⱼᵢₖ explícitamente
-                result[k] += f_ijk * a[j] * b[i];
-            }
-        }
-        result
-    }
     
     pub fn conmutador(&self, a: &DVector<f64>, b: &DVector<f64>) -> DVector<f64> {
         self.multiply(a, b) - self.multiply_rev(a, b)
