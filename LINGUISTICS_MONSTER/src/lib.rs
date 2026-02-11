@@ -8,11 +8,21 @@ pub mod monster_structures;
 // Funciones públicas principales
 pub use monster_structures::{
     analizar_palabra,
+    analizar_palabra_extendida,
     tau_natural,
+    tau_natural_extendido,
     SubestructuraMonster,
     ErrorLinguistica,
+    ParametrosArticulatorios,
 };
 
 // Constantes fundamentales
 pub const PHI_INV_MOD_1: f64 = 0.6180339887498948; // φ⁻¹ mod 1 ≈ 0.618
 pub const TOLERANCIA_TAU: f64 = 1e-6; // Tolerancia para comparaciones
+
+// Módulos de tests (solo en modo test)
+#[cfg(test)]
+mod tests {
+    // Esto incluirá automáticamente coherence_test.rs y multilingual_test.rs
+    // si están en src/tests/
+}
