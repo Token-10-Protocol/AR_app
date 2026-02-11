@@ -234,20 +234,6 @@ impl ConsciousOperators {
     // ========================================================
     // MATRIX EXPONENTIAL - ESCALAR SIEMPRE A LA IZQUIERDA
     // ========================================================
-    fn matrix_exponential(&self, mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
-        let dim = mat.nrows();
-        let mut result = DMatrix::identity(dim, dim);
-        let mut term = DMatrix::identity(dim, dim);
-        
-        for n in 1..10 {
-            term = term * mat;
-            let scale = 1.0 / (n as f64);
-            term = scale * term;  // f64 * Matrix ✅
-            result = result + term;
-        }
-        
-        result
-    }
     
     // ========================================================
     // UTILIDADES
@@ -345,3 +331,18 @@ mod tests {
         println!("✅ CONSTANTES ESTRUCTURA: asimétricas verificadas");
     }
 }
+
+    fn matrix_exponential(&self, mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
+        let dim = mat.nrows();
+        let mut result = DMatrix::identity(dim, dim);
+        let mut term = DMatrix::identity(dim, dim);
+        
+        for n in 1..10 {
+            term = term * mat;
+            let scale = Complex64::new(1.0 / (n as f64), 0.0);  // Complex<f64>
+            term = scale * term;  // Complex64 * Matrix<Complex64> ✅
+            result = result + term;
+        }
+        
+        result
+    }
