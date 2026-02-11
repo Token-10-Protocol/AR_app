@@ -162,19 +162,6 @@ impl ConsciousOperators {
     // ========================================================
     // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
     // ========================================================
-    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
-        let dim = mat.nrows();
-        let mut result = DMatrix::identity(dim, dim);
-        let mut term = DMatrix::identity(dim, dim);
-        
-        for n in 1..10 {
-            term = term * mat;
-            // Usar .scale() en lugar de multiplicación escalar
-            term = term.scale(1.0 / (n as f64));
-            result = result + term;
-        }
-        result
-    }
     
     // ========================================================
     // PRODUCTO NO CONMUTATIVO
@@ -279,3 +266,20 @@ mod tests {
         println!("✅ CONSTANTES ESTRUCTURA: asimétricas");
     }
 }
+
+    // ========================================================
+    // MATRIX EXPONENTIAL - SIN MOVES MÚLTIPLES
+    // ========================================================
+    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
+        let dim = mat.nrows();
+        let mut result = DMatrix::identity(dim, dim);
+        let mut term = DMatrix::identity(dim, dim);
+        let mut factorial = 1.0;
+        
+        for n in 1..10 {
+            factorial *= n as f64;
+            term = term * mat;
+            result = result + term.scale(1.0 / factorial);
+        }
+        result
+    }
