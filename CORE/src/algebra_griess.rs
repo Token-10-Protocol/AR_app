@@ -1,14 +1,14 @@
 //! ÁLGEBRA DE GRIESS - GRUPO MONSTER
 //! VERSIÓN NO-CONMUTATIVA CERTIFICADA
 
-use nalgebra::{DVector, Complex};
+use nalgebra::DVector;
 use num_complex::Complex64;
 use std::collections::HashMap;
 
 pub const GRIESS_DIM: usize = 196884;
 pub const PHI: f64 = 1.618033988749895;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GriessAlgebra {
     constantes: HashMap<(usize, usize, usize), Complex64>,
     pub identity: DVector<Complex64>,

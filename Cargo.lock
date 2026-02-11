@@ -9,6 +9,7 @@ dependencies = [
  "anyhow",
  "approx",
  "nalgebra",
+ "num-complex",
 ]
 
 [[package]]
