@@ -138,10 +138,112 @@ impl ConsciousOperators {
     }
     
     fn init_manifestacion() -> [Operator; 6] {
+
+    // ========================================================
+    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
+    // ========================================================
+    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
+        let dim = mat.nrows();
+        let mut result = DMatrix::identity(dim, dim);
+        let mut term = DMatrix::identity(dim, dim);
+        let mut factorial = 1.0;
+        
+        for n in 1..10 {
+            factorial *= n as f64;
+            term = term * mat;
+            result = result + term.scale(1.0 / factorial);
+        }
+        result
+    }
         let names = ["M̂₁", "M̂₂", "M̂₃", "M̂₄", "M̂₅", "M̂₆"];
+
+    // ========================================================
+    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
+    // ========================================================
+    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
+        let dim = mat.nrows();
+        let mut result = DMatrix::identity(dim, dim);
+        let mut term = DMatrix::identity(dim, dim);
+        let mut factorial = 1.0;
+        
+        for n in 1..10 {
+            factorial *= n as f64;
+            term = term * mat;
+            result = result + term.scale(1.0 / factorial);
+        }
+        result
+    }
         let mut ops = [(); 6].map(|_| Operator::new(0, "Manifestación", ""));
+
+    // ========================================================
+    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
+    // ========================================================
+    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
+        let dim = mat.nrows();
+        let mut result = DMatrix::identity(dim, dim);
+        let mut term = DMatrix::identity(dim, dim);
+        let mut factorial = 1.0;
+        
+        for n in 1..10 {
+            factorial *= n as f64;
+            term = term * mat;
+            result = result + term.scale(1.0 / factorial);
+        }
+        result
+    }
         for i in 0..6 { ops[i] = Operator::new(i + 36, "Manifestación", names[i]); }
+
+    // ========================================================
+    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
+    // ========================================================
+    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
+        let dim = mat.nrows();
+        let mut result = DMatrix::identity(dim, dim);
+        let mut term = DMatrix::identity(dim, dim);
+        let mut factorial = 1.0;
+        
+        for n in 1..10 {
+            factorial *= n as f64;
+            term = term * mat;
+            result = result + term.scale(1.0 / factorial);
+        }
+        result
+    }
         ops
+
+    // ========================================================
+    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
+    // ========================================================
+    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
+        let dim = mat.nrows();
+        let mut result = DMatrix::identity(dim, dim);
+        let mut term = DMatrix::identity(dim, dim);
+        let mut factorial = 1.0;
+        
+        for n in 1..10 {
+            factorial *= n as f64;
+            term = term * mat;
+            result = result + term.scale(1.0 / factorial);
+        }
+        result
+    }
+    }
+
+    // ========================================================
+    // MATRIX EXPONENTIAL - FUNCIÓN ASOCIADA (SIN &self)
+    // ========================================================
+    fn matrix_exponential(mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
+        let dim = mat.nrows();
+        let mut result = DMatrix::identity(dim, dim);
+        let mut term = DMatrix::identity(dim, dim);
+        let mut factorial = 1.0;
+        
+        for n in 1..10 {
+            factorial *= n as f64;
+            term = term * mat;
+            result = result + term.scale(1.0 / factorial);
+        }
+        result
     }
     
     // ========================================================
