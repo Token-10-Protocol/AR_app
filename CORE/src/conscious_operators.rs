@@ -229,7 +229,7 @@ mod tests {
     fn test_no_conmutatividad() {
         let ops = ConsciousOperators::new();
         let a = DVector::from_fn(DIM, |i, _| (i as f64 + 1.0) * PHI.powi(-(i as i32)));
-        let b = DVector::from_fn(DIM, |i, _| (DIM - i as f64) * PHI.powi(-((DIM - i) as i32)));
+        let b = DVector::from_fn(DIM, |i, _| (DIM as f64 - i as f64) * PHI.powi(-((DIM - i) as i32)));
         let diff = (&ops.multiply(&a, &b) - &ops.multiply_rev(&a, &b)).norm();
         assert!(diff > 1e-12);
         println!("✅ [Ôᵢ,Ôⱼ] ≠ 0: {}", diff);
