@@ -51,21 +51,6 @@ impl Operator {
 }
 
 impl ConsciousOperators {
-    pub fn new() -> Self {
-        let griess = GriessAlgebra::new();
-        let mut f_ijk = Vec::new();
-        
-        for i in 0..TOTAL_OPERATORS {
-            for j in 0..TOTAL_OPERATORS {
-                for k in 0..TOTAL_OPERATORS {
-                    let f = PHI.powi(-((i + j + k) as i32)) * 
-                            ((i + 1) * (j + 1) % (k + 2)) as f64 / 196884.0;
-                    if f.abs() > 1e-10 {
-                        f_ijk.push(((i, j, k), f));
-                    }
-                }
-            }
-        }
         
         Self {
             amor: Self::init_amor(),
