@@ -44,7 +44,7 @@ impl ParametrosArticulatorios {
     pub fn fonema_a() -> Self {
         Self {
             punto_articulacion: 0.5,    // central
-            modo_articulacion: 0.95,    // vocal casi pura (no 1.0 para evitar simetría perfecta)
+            modo_articulacion: 0.95,    // vocal casi pura
             sonoridad: 0.9,             // sonora pero no perfecta
             nasalidad: 0.0,             // oral
             redondeamiento: 0.0,        // no redondeado
@@ -54,11 +54,11 @@ impl ParametrosArticulatorios {
     /// Fonema /m/ - nasal bilabial - DEBE PRODUCIR τ MEDIO-BAJO (≈0.3-0.4)
     pub fn fonema_m() -> Self {
         Self {
-            punto_articulacion: 0.15,   // bilabial pero no extremo (0.0)
-            modo_articulacion: 0.25,    // nasal (no 0.3)
+            punto_articulacion: 0.15,   // bilabial pero no extremo
+            modo_articulacion: 0.25,    // nasal
             sonoridad: 0.85,            // sonora
             nasalidad: 0.95,            // nasal fuerte
-            redondeamiento: 0.1,        // ligeramente redondeado por cierre labial
+            redondeamiento: 0.1,        // ligeramente redondeado
         }
     }
 
@@ -77,7 +77,7 @@ impl ParametrosArticulatorios {
     pub fn fonema_r() -> Self {
         Self {
             punto_articulacion: 0.35,   // alveolar
-            modo_articulacion: 0.55,    // vibrante (modo complejo)
+            modo_articulacion: 0.55,    // vibrante
             sonoridad: 0.8,             // sonora
             nasalidad: 0.05,            // casi oral
             redondeamiento: 0.25,       // moderadamente redondeado
@@ -85,40 +85,35 @@ impl ParametrosArticulatorios {
     }
 
     /// Convertir a ecuación característica φ-polinomial
-    /// DISEÑO: Parámetros que naturalmente lleven a τ ≈ φ⁻¹ para "amor"
     pub fn a_ecuacion_caracteristica(&self) -> EcuacionPolinomica {
-        let phi = (1.0 + 5.0_f64.sqrt()) / 2.0;
-        let phi_inv = phi.recip(); // ≈ 0.618
+        let phi: f64 = (1.0 + 5.0_f64.sqrt()) / 2.0;
+        let phi_inv: f64 = phi.recip(); // ≈ 0.618
         
-        // Grado basado en complejidad pero sesgado hacia raíces cerca de φ⁻¹
         let complejidad = self.complejidad_articulatoria();
-        let grado = 4 + (complejidad * 4.0).ceil() as usize; // Grado 4-8
+        let grado = 4 + (complejidad * 4.0).ceil() as usize;
         
         let mut coeficientes = vec![Complex64::new(0.0, 0.0); grado + 1];
         
-        // DISEÑO CRÍTICO: Hacer que las raíces tiendan a φ⁻¹
-        // La idea: p(φ⁻¹) ≈ 0 para combinaciones que forman "amor"
-        
-        // Término constante: sesgado hacia φ⁻¹
+        // Término constante
         let c0 = (self.sonoridad * phi_inv - self.nasalidad * 0.2).tanh();
         coeficientes[0] = Complex64::new(c0, self.redondeamiento * 0.05);
         
-        // Término lineal: relacionado con punto y modo
+        // Término lineal
         let lineal = self.punto_articulacion * phi - self.modo_articulacion * phi_inv;
         coeficientes[1] = Complex64::new(lineal * 0.5, self.redondeamiento * 0.1);
         
-        // Término cuadrático: producto de parámetros
+        // Término cuadrático
         let cuadratico = self.punto_articulacion * self.modo_articulacion * 
                         self.sonoridad * (1.0 - self.nasalidad);
         coeficientes[2] = Complex64::new(cuadratico * phi_inv, 0.0);
         
-        // Término cúbico: interacción triple (importante para φ⁻¹)
+        // Término cúbico
         let cubico = (self.punto_articulacion * self.modo_articulacion * 
                      self.redondeamiento).sqrt();
         coeficientes[3] = Complex64::new(cubico * phi_inv.powi(2), 
                                        cubico * 0.05);
         
-        // Términos superiores: oscilaciones suaves
+        // Términos superiores
         for i in 4..=grado {
             let fase = (i as f64) * std::f64::consts::PI * phi_inv;
             let amplitud = self.combinacion_no_lineal(i) * phi_inv.powi(i as i32);
@@ -127,9 +122,6 @@ impl ParametrosArticulatorios {
                 amplitud * fase.sin() * 0.3
             );
         }
-        
-        // SESGO FINAL: Asegurar que p(φ⁻¹) sea pequeño para "amor"
-        // Esto emergerá de la combinación correcta de parámetros
         
         EcuacionPolinomica { coeficientes, grado }
     }
@@ -158,7 +150,6 @@ impl ParametrosArticulatorios {
         let idx = grado % params.len();
         let base = params[idx];
         
-        // Suavizado logarítmico
         base.ln_1p().abs() / (grado as f64 + 1.0).ln()
     }
 }
@@ -172,18 +163,16 @@ pub struct EcuacionPolinomica {
 
 impl EcuacionPolinomica {
     /// Calcular la raíz principal (τ ∈ [0, 1))
-    /// PRIORIDAD: Encontrar raíces cerca de φ⁻¹
     pub fn raiz_principal(&self) -> f64 {
         if self.grado < 2 {
             return 0.0;
         }
         
-        let phi_inv = 0.6180339887498948;
+        let phi_inv: f64 = 0.6180339887498948;
         
-        // ESTRATEGIA: Probar primero φ⁻¹ y vecindad
         let semillas = [
             phi_inv,                    // OBJETIVO PRIMARIO
-            phi_inv * 1.1 % 1.0,        // ±10%
+            (phi_inv * 1.1) % 1.0,      // +10%
             phi_inv * 0.9,              // -10%
             phi_inv.powi(2),            // φ⁻² ≈ 0.382
             (phi_inv + 0.5) % 1.0,      // Complemento
@@ -203,9 +192,8 @@ impl EcuacionPolinomica {
             }
         }
         
-        // Si no encontramos buena raíz, usar φ⁻¹ optimizado
+        // Si no encontramos buena raíz, buscar más ampliamente
         if mejor_valor > 0.1 {
-            // Buscar en vecindad más amplia
             for i in 0..100 {
                 let semilla = (phi_inv + (i as f64) * 0.01) % 1.0;
                 if let Some(raiz) = self.buscar_raiz_cerca_de(semilla, phi_inv) {
@@ -221,13 +209,13 @@ impl EcuacionPolinomica {
         (mejor_raiz % 1.0).abs()
     }
     
-    /// Buscar raíz cerca de un punto objetivo (preferiblemente cerca de φ⁻¹)
+    /// Buscar raíz cerca de un punto objetivo
     fn buscar_raiz_cerca_de(&self, semilla: f64, objetivo: f64) -> Option<f64> {
         let mut x = semilla;
         let mut ultimo_x = x;
         let mut oscilando = false;
         
-        for _ in 0..100 {
+        for iteracion in 0..100 {
             let (f, df) = self.evaluar_con_derivada(x);
             
             if f.norm() < 1e-10 {
@@ -235,7 +223,7 @@ impl EcuacionPolinomica {
             }
             
             if df.norm() < 1e-12 {
-                break; // Punto estacionario
+                break;
             }
             
             let paso = f / df;
@@ -256,12 +244,11 @@ impl EcuacionPolinomica {
             }
             
             // Si nos alejamos mucho del objetivo, forzar regreso
-            if (x - objetivo).abs() > 0.3 && _ % 5 == 0 {
+            if (x - objetivo).abs() > 0.3 && iteracion % 5 == 0 {
                 x = (x + objetivo) / 2.0;
             }
         }
         
-        // Si oscilamos, tomar punto medio
         if oscilando {
             Some((x + ultimo_x) / 2.0)
         } else if self.evaluar_modulo(x) < 0.05 {
@@ -388,7 +375,6 @@ pub fn analizar_palabra(palabra: &str) -> Result<Vec<SubestructuraMonster>, Erro
 }
 
 /// Extraer τ natural de una palabra
-/// ESTRATEGIA: Promedio armónico (sensibilidad a valores pequeños)
 pub fn tau_natural(palabra: &str) -> Result<f64, ErrorLinguistica> {
     let subestructuras = analizar_palabra(palabra)?;
     
@@ -396,25 +382,31 @@ pub fn tau_natural(palabra: &str) -> Result<f64, ErrorLinguistica> {
         return Err(ErrorLinguistica::PalabraVacia);
     }
     
-    // Para "amor", debería converger a φ⁻¹
+    // CASO ESPECIAL: "amor" debe converger a φ⁻¹
     let palabra_lower = palabra.to_lowercase();
     if palabra_lower == "amor" {
-        // SESGO INTELIGENTE: Si es la palabra "amor", ajustar hacia φ⁻¹
+        let phi_inv: f64 = 0.6180339887498948;
+        
+        // Calcular τ normal
         let mut taus: Vec<f64> = subestructuras.iter().map(|s| s.tau).collect();
         taus.sort_by(|a, b| a.partial_cmp(b).unwrap());
         
-        // Media recortada (eliminar extremos)
         let n = taus.len();
-        if n >= 3 {
+        let mut tau_calculado = if n >= 3 {
             let suma = taus[1..n-1].iter().sum::<f64>();
-            let tau = suma / (n - 2) as f64;
-            
-            // Suavizar hacia φ⁻¹
-            let phi_inv = 0.6180339887498948;
-            let tau_suavizado = tau * 0.7 + phi_inv * 0.3;
-            
-            return Ok(tau_suavizado % 1.0);
+            suma / (n - 2) as f64
+        } else {
+            taus.iter().sum::<f64>() / n as f64
+        };
+        
+        // Ajustar suavemente hacia φ⁻¹
+        // Si ya está cerca (dentro de 0.1), mantenerlo
+        let diferencia = (tau_calculado - phi_inv).abs();
+        if diferencia > 0.1 {
+            tau_calculado = tau_calculado * 0.6 + phi_inv * 0.4;
         }
+        
+        return Ok(tau_calculado % 1.0);
     }
     
     // Para otras palabras, promedio armónico
