@@ -145,3 +145,17 @@ mod tests {
         assert_abs_diff_eq!(output[1].im, 2.0 * scale, epsilon = 1e-12);
     }
 }
+
+impl MonsterMatrix444 {
+    pub fn dim(&self) -> usize {
+        self.data.nrows()
+    }
+    
+    pub fn nrows(&self) -> usize {
+        self.data.nrows()
+    }
+    
+    pub fn ncols(&self) -> usize {
+        self.data.ncols()
+    }
+}
