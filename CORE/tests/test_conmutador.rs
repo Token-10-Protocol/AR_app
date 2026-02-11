@@ -16,11 +16,12 @@ mod tests {
         
         let ab = algebra.multiply(&amor, &amour);
         let ba = algebra.multiply_rev(&amor, &amour);
+        let diferencia = (ab - ba).norm();
         
         assert_ne!(ab, ba);
-        assert!((ab - ba).norm() > 0.001);
+        assert!(diferencia > 0.001);
         
-        println!("✅ [amor,amour] ≠ 0: {}", (ab - ba).norm());
+        println!("✅ [amor,amour] ≠ 0: {}", diferencia);
         println!("✅ Monster Group NO es conmutativo");
         println!("✅ Álgebra Rose ahora es matemáticamente correcta");
     }
