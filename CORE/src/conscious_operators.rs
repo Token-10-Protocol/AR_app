@@ -246,23 +246,843 @@ mod tests {
     
     #[test]
     fn test_constantes_asimetricas() {
+
+    #[test]
+    fn test_no_conmutatividad_real() {
         let ops = ConsciousOperators::new();
-        let mut asimetrico = false;
-        let mut count_asim = 0;
         
-        for &((i, j, k), f) in &ops.f_ijk {
-            for &((i2, j2, k2), f2) in &ops.f_ijk {
-                if i == j2 && j == i2 && k == k2 && i != j {
-                    if (f - f2).abs() > 1e-6 {
-                        asimetrico = true;
-                        count_asim += 1;
-                    }
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
                 }
             }
         }
         
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+        let ops = ConsciousOperators::new();
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+        let mut asimetrico = false;
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+        let mut count_asim = 0;
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+        
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+        for &((i, j, k), f) in &ops.f_ijk {
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+            for &((i2, j2, k2), f2) in &ops.f_ijk {
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+                if i == j2 && j == i2 && k == k2 && i != j {
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+                    if (f - f2).abs() > 1e-6 {
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+                        asimetrico = true;
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+                        count_asim += 1;
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+                    }
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+                }
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+            }
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+        }
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+        
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
         println!("🔴 Pares asimétricos encontrados: {}", count_asim);
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
         assert!(asimetrico, "TODAS las constantes son simétricas");
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
         println!("✅ CONSTANTES ESTRUCTURA: asimétricas verificadas");
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
+    }
+    }
+
+    #[test]
+    fn test_no_conmutatividad_real() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN PAR (i,j) CON CONSTANTES ASIMÉTRICAS
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        'outer: for &((i, j, _), f1) in &ops.f_ijk {
+            for &((i2, j2, _), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f1.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break 'outer;
+                }
+            }
+        }
+        
+        assert!(encontrado, "No se encontraron constantes asimétricas no-cero");
+        println!("🔴 Usando índices i={}, j={}", i_test, j_test);
+        
+        // VECTORES CON SOPORTE EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = PHI;
+        b[i_test] = PSI;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [A,B] norm = {}", diff);
+        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}");
     }
 }
