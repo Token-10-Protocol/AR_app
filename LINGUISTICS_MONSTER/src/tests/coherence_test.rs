@@ -3,8 +3,8 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::monster_structures::ParametrosArticulatorios;
-    use crate::{analizar_palabra, tau_natural};
+    use linguistics_monster::monster_structures::ParametrosArticulatorios;
+    use linguistics_monster::{analizar_palabra, tau_natural};
 
     const PHI_INV: f64 = 0.6180339887498948; // φ⁻¹ mod 1
     const TOLERANCIA_ALTA: f64 = 1e-6;  // Para prueba inicial
@@ -14,7 +14,7 @@ mod tests {
     #[test]
     fn test_parametros_fonemas_validos() {
         // Verificar que todos los parámetros estén en [0, 1]
-        let fonemas = [
+        let fonemas: [ParametrosArticulatorios; 4] = [
             ParametrosArticulatorios::fonema_a(),
             ParametrosArticulatorios::fonema_m(),
             ParametrosArticulatorios::fonema_o(),
