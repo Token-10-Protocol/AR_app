@@ -59,7 +59,7 @@ pub struct Operator {
 impl Operator {
     pub fn new(index: usize, family: &'static str, name: &'static str) -> Self {
         let dim = 444;
-        let mut matrix = DMatrix::zeros(dim, dim);
+        let matrix = DMatrix::zeros(dim, dim);
         
         // INICIALIZACIÓN BASE - SE COMPLETARÁ POR FAMILIA
         // Cada familia tiene su propia álgebra (SU(2), Clifford, etc.)
@@ -212,7 +212,7 @@ impl ConsciousOperators {
         
         for k in 0..TOTAL_OPERATORS {
             let op = self.get_operator(k);
-            let exp_theta_o = self.matrix_exponential(&(op.matrix * Complex64::new(0.0, thetas[k])));
+            let exp_theta_o = self.matrix_exponential(&(op.matrix * Complex64(op.matrix.clone() * Complex64::new(0.0, thetas[k])));
             result = result * exp_theta_o;
         }
         
@@ -282,7 +282,7 @@ impl ConsciousOperators {
         let mut term = DMatrix::identity(dim, dim);
         
         for n in 1..10 {
-            term = term * mat / (n as f64);
+            term = term * mat * (1.0 / (n as f64));
             result = result + term;
         }
         
