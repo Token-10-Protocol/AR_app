@@ -1,0 +1,41 @@
+    #[test]
+    fn test_no_conmutatividad() {
+        let ops = ConsciousOperators::new();
+        
+        // ENCONTRAR UN TRIPLE (i,j,k) CON f_ij ≠ 0 Y f_ji ≠ 0
+        let mut i_test = 0;
+        let mut j_test = 0;
+        let mut encontrado = false;
+        
+        for &((i, j, _), f) in &ops.f_ijk {
+            for &((i2, j2, k2), f2) in &ops.f_ijk {
+                if i == j2 && j == i2 && i != j && f.abs() > 1e-6 && f2.abs() > 1e-6 {
+                    i_test = i;
+                    j_test = j;
+                    encontrado = true;
+                    break;
+                }
+            }
+            if encontrado { break; }
+        }
+        
+        assert!(encontrado, "NO HAY CONSTANTES ASIMÉTRICAS NO-CERO");
+        
+        // CONSTRUIR VECTORES CON SOPORTE SOLO EN i_test Y j_test
+        let mut a = DVector::zeros(DIM);
+        let mut b = DVector::zeros(DIM);
+        
+        a[i_test] = 1.0;
+        a[j_test] = 0.5;
+        b[i_test] = 0.3;
+        b[j_test] = 1.0;
+        
+        let ab = ops.multiply(&a, &b);
+        let ba = ops.multiply_rev(&a, &b);
+        let diff = (&ab - &ba).norm();
+        
+        println!("🔴 [Ôᵢ,Ôⱼ] norm = {}", diff);
+        println!("🔴 i = {}, j = {}", i_test, j_test);
+        assert!(diff > 1e-12, "CONMUTATIVO DETECTADO: AB = BA (diff = {})", diff);
+        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}", diff);
+    }
