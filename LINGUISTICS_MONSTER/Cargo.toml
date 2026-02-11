@@ -18,3 +18,5 @@ approx = "0.5"
 [[test]]
 name = "coherence_test"
 path = "src/tests/coherence_test.rs"
+
+[workspace]
