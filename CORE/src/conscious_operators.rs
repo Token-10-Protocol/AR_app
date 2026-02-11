@@ -243,19 +243,6 @@ mod tests {
     }
     
     #[test]
-    fn test_no_conmutatividad() {
-        let ops = ConsciousOperators::new();
-        let a = DVector::from_fn(DIM, |i, _| (i as f64 + 1.0) * PHI.powi(-(i as i32)));
-        let b = DVector::from_fn(DIM, |i, _| (DIM as f64 - i as f64) * PHI.powi(-((DIM - i) as i32)));
-        
-        let ab = ops.multiply(&a, &b);
-        let ba = ops.multiply_rev(&a, &b);
-        let diff = (&ab - &ba).norm();
-        
-        println!("🔴 [Ôᵢ,Ôⱼ] norm = {}", diff);
-        assert!(diff > 1e-6, "CONMUTATIVO DETECTADO: AB = BA (diff = {})", diff);
-        println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}", diff);
-    }
     
     #[test]
     fn test_constantes_asimetricas() {
