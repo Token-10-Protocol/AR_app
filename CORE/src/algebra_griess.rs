@@ -86,3 +86,9 @@ impl Default for GriessAlgebra {
         Self::new()
     }
 }
+
+impl GriessAlgebra {
+    pub fn dim(&self) -> usize {
+        196883
+    }
+}
