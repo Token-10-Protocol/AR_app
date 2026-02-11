@@ -16,6 +16,7 @@ pub const OPS_PER_FAMILY: usize = 6;
 pub const TOTAL_OPERATORS: usize = 42;
 pub const MONSTER_196883: f64 = 196883.0;
 pub const MONSTER_196884: f64 = 196884.0;
+pub const DIM: usize = 444;
 
 // ============================================================
 // 7 FAMILIAS DE 6 OPERADORES - DECLARACIÓN
@@ -58,18 +59,14 @@ pub struct Operator {
 
 impl Operator {
     pub fn new(index: usize, family: &'static str, name: &'static str) -> Self {
-        let dim = 444;
-        let matrix = DMatrix::zeros(dim, dim);
-        
-        // INICIALIZACIÓN BASE - SE COMPLETARÁ POR FAMILIA
-        // Cada familia tiene su propia álgebra (SU(2), Clifford, etc.)
+        let matrix = DMatrix::zeros(DIM, DIM);
         
         Self {
             index,
             family,
             name,
             matrix,
-            phase_theta: PHI * (index as f64 + 1.0), // Base φ, único por operador
+            phase_theta: PHI * (index as f64 + 1.0),
         }
     }
 }
@@ -84,8 +81,6 @@ impl ConsciousOperators {
         // Inicializar constantes de estructura NO CONMUTATIVAS
         let mut f_ijk = Vec::new();
         
-        // fᵢⱼₖ ≠ fⱼᵢₖ (NO conmutatividad)
-        // Valores basados en Monster, φ, Fibonacci
         for i in 0..TOTAL_OPERATORS {
             for j in 0..TOTAL_OPERATORS {
                 for k in 0..TOTAL_OPERATORS {
@@ -121,18 +116,6 @@ impl ConsciousOperators {
         let mut ops = [(); 6].map(|_| Operator::new(0, "Amor", ""));
         for i in 0..6 {
             ops[i] = Operator::new(i, "Amor", names[i]);
-            // SU(2): Matrices de Pauli generalizadas
-            let dim = 444;
-            for x in 0..dim {
-                for y in 0..dim {
-                    if x == y {
-                        ops[i].matrix[(x, y)] = Complex64::new(
-                            PHI * ((i + 1) as f64).sin(),
-                            0.0
-                        );
-                    }
-                }
-            }
         }
         ops
     }
@@ -143,8 +126,6 @@ impl ConsciousOperators {
         let mut ops = [(); 6].map(|_| Operator::new(0, "Verdad", ""));
         for i in 0..6 {
             ops[i] = Operator::new(i + 6, "Verdad", names[i]);
-            // Clifford: γᵢγⱼ + γⱼγᵢ = 2δᵢⱼ
-            // Implementación base - se refinará
         }
         ops
     }
@@ -155,7 +136,6 @@ impl ConsciousOperators {
         let mut ops = [(); 6].map(|_| Operator::new(0, "Belleza", ""));
         for i in 0..6 {
             ops[i] = Operator::new(i + 12, "Belleza", names[i]);
-            // φ-estética: autovalores = φ^k
         }
         ops
     }
@@ -166,7 +146,6 @@ impl ConsciousOperators {
         let mut ops = [(); 6].map(|_| Operator::new(0, "Resonancia", ""));
         for i in 0..6 {
             ops[i] = Operator::new(i + 18, "Resonancia", names[i]);
-            // Lie: generadores de SO(196884)
         }
         ops
     }
@@ -177,7 +156,6 @@ impl ConsciousOperators {
         let mut ops = [(); 6].map(|_| Operator::new(0, "Dimensional", ""));
         for i in 0..6 {
             ops[i] = Operator::new(i + 24, "Dimensional", names[i]);
-            // Fibonacci: proyección a campos F_{k+3}
         }
         ops
     }
@@ -188,7 +166,6 @@ impl ConsciousOperators {
         let mut ops = [(); 6].map(|_| Operator::new(0, "Temporal Fibonacci", ""));
         for i in 0..6 {
             ops[i] = Operator::new(i + 30, "Temporal Fibonacci", names[i]);
-            // Evolución: exp(i·t·φⁿ)
         }
         ops
     }
@@ -199,7 +176,6 @@ impl ConsciousOperators {
         let mut ops = [(); 6].map(|_| Operator::new(0, "Manifestación", ""));
         for i in 0..6 {
             ops[i] = Operator::new(i + 36, "Manifestación", names[i]);
-            // Realización: transforma potencial → actual
         }
         ops
     }
@@ -208,7 +184,7 @@ impl ConsciousOperators {
     // OPERADOR ROBERTO - ∏ₖ₌₁⁴² exp(iθₖ Ôₖ)
     // ========================================================
     pub fn operador_roberto(&self, thetas: &[f64; TOTAL_OPERATORS]) -> DMatrix<Complex64> {
-        let mut result = DMatrix::identity(444, 444);
+        let mut result = DMatrix::identity(DIM, DIM);
         
         for k in 0..TOTAL_OPERATORS {
             let op = self.get_operator(k);
@@ -223,11 +199,10 @@ impl ConsciousOperators {
     // PRODUCTO NO CONMUTATIVO - AB ≠ BA
     // ========================================================
     pub fn multiply(&self, a: &DVector<f64>, b: &DVector<f64>) -> DVector<f64> {
-        let dim = 444;
-        let mut result = DVector::zeros(dim);
+        let mut result = DVector::zeros(DIM);
         
         for &((i, j, k), f_ijk) in &self.f_ijk {
-            if i < dim && j < dim && k < dim {
+            if i < DIM && j < DIM && k < DIM {
                 result[k] += f_ijk * a[i] * b[j];
             }
         }
@@ -236,12 +211,10 @@ impl ConsciousOperators {
     }
     
     pub fn multiply_rev(&self, a: &DVector<f64>, b: &DVector<f64>) -> DVector<f64> {
-        let dim = 444;
-        let mut result = DVector::zeros(dim);
+        let mut result = DVector::zeros(DIM);
         
         for &((i, j, k), f_ijk) in &self.f_ijk {
-            if i < dim && j < dim && k < dim {
-                // fⱼᵢₖ ≠ fᵢⱼₖ - ORDEN INVERTIDO
+            if i < DIM && j < DIM && k < DIM {
                 result[k] += f_ijk * a[j] * b[i];
             }
         }
@@ -259,6 +232,24 @@ impl ConsciousOperators {
     }
     
     // ========================================================
+    // MATRIX EXPONENTIAL - ESCALAR SIEMPRE A LA IZQUIERDA
+    // ========================================================
+    fn matrix_exponential(&self, mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
+        let dim = mat.nrows();
+        let mut result = DMatrix::identity(dim, dim);
+        let mut term = DMatrix::identity(dim, dim);
+        
+        for n in 1..10 {
+            term = term * mat;
+            let scale = 1.0 / (n as f64);
+            term = scale * term;  // f64 * Matrix ✅
+            result = result + term;
+        }
+        
+        result
+    }
+    
+    // ========================================================
     // UTILIDADES
     // ========================================================
     pub fn get_operator(&self, index: usize) -> &Operator {
@@ -272,23 +263,6 @@ impl ConsciousOperators {
             36..=41 => &self.manifestacion[index - 36],
             _ => panic!("Índice de operador inválido: {}", index),
         }
-    }
-    
-    fn matrix_exponential(&self, mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
-        // Pade approximation for matrix exponential
-        // Simplified for now - será refinado
-    fn matrix_exponential(&self, mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
-        // Pade approximation - usando escala multiplicativa correcta
-        let dim = mat.nrows();
-        let mut result = DMatrix::identity(dim, dim);
-        let mut term = DMatrix::identity(dim, dim);
-        
-        for n in 1..10 {
-            term = term * mat * (1.0 / (n as f64));
-            result = result + term;
-        }
-        
-        result
     }
 }
 
@@ -304,7 +278,6 @@ mod tests {
     fn test_42_operadores_existen() {
         let ops = ConsciousOperators::new();
         
-        // Verificar 7 familias × 6 operadores = 42
         assert_eq!(ops.amor.len(), 6);
         assert_eq!(ops.verdad.len(), 6);
         assert_eq!(ops.belleza.len(), 6);
@@ -313,7 +286,6 @@ mod tests {
         assert_eq!(ops.temporal.len(), 6);
         assert_eq!(ops.manifestacion.len(), 6);
         
-        // Verificar índices únicos
         for i in 0..TOTAL_OPERATORS {
             let op = ops.get_operator(i);
             assert_eq!(op.index, i);
@@ -328,8 +300,8 @@ mod tests {
         let thetas = [PHI; TOTAL_OPERATORS];
         let roberto = ops.operador_roberto(&thetas);
         
-        assert_eq!(roberto.nrows(), 444);
-        assert_eq!(roberto.ncols(), 444);
+        assert_eq!(roberto.nrows(), DIM);
+        assert_eq!(roberto.ncols(), DIM);
         
         println!("✅ OPERADOR ROBERTO: IMPLEMENTADO");
     }
@@ -338,33 +310,26 @@ mod tests {
     fn test_no_conmutatividad_42() {
         let ops = ConsciousOperators::new();
         
-        // Crear vectores aleatorios en H_AR (444D)
-        let a = DVector::from_fn(444, |i, _| (i as f64 + 1.0) * PHI.powi(-(i as i32)));
-        let b = DVector::from_fn(444, |i, _| (444 - i as f64) * PHI.powi(-((444 - i) as i32)));
+        let a = DVector::from_fn(DIM, |i, _| (i as f64 + 1.0) * PHI.powi(-(i as i32)));
+        let b = DVector::from_fn(DIM, |i, _| (DIM - i as f64) * PHI.powi(-((DIM - i) as i32)));
         
         let ab = ops.multiply(&a, &b);
         let ba = ops.multiply_rev(&a, &b);
         let conmutador = ops.conmutador(&a, &b);
         
-        // Verificar AB ≠ BA
         let diff = (&ab - &ba).norm();
         assert!(diff > 1e-12);
-        
-        // Verificar [A,B] = AB - BA
         assert_relative_eq!(conmutador.norm(), diff, epsilon = 1e-10);
         
         println!("✅ [Ôᵢ,Ôⱼ] ≠ 0: {} (no-conmutatividad verificada)", diff);
-        println!("✅ FAMILIAS 42: producto no-conmutativo implementado");
     }
     
     #[test]
     fn test_estructura_mentira() {
         let ops = ConsciousOperators::new();
         
-        // Verificar que f_ijk existe y es asimétrica
         assert!(!ops.f_ijk.is_empty());
         
-        // Buscar un par donde fᵢⱼₖ ≠ fⱼᵢₖ
         let mut encontrado_asimetrico = false;
         for &((i, j, k), f) in &ops.f_ijk {
             for &((i2, j2, k2), f2) in &ops.f_ijk {
@@ -376,7 +341,7 @@ mod tests {
             }
         }
         
-        assert!(encontrado_asimetrico, "Debe existir al menos una constante fᵢⱼₖ ≠ fⱼᵢₖ");
+        assert!(encontrado_asimetrico, "Debe existir fᵢⱼₖ ≠ fⱼᵢₖ");
         println!("✅ CONSTANTES ESTRUCTURA: asimétricas verificadas");
     }
 }
