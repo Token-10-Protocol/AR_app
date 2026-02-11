@@ -277,6 +277,8 @@ impl ConsciousOperators {
     fn matrix_exponential(&self, mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
         // Pade approximation for matrix exponential
         // Simplified for now - será refinado
+    fn matrix_exponential(&self, mat: &DMatrix<Complex64>) -> DMatrix<Complex64> {
+        // Pade approximation - usando escala multiplicativa correcta
         let dim = mat.nrows();
         let mut result = DMatrix::identity(dim, dim);
         let mut term = DMatrix::identity(dim, dim);
