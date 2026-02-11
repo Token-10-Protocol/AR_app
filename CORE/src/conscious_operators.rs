@@ -212,7 +212,7 @@ impl ConsciousOperators {
         
         for k in 0..TOTAL_OPERATORS {
             let op = self.get_operator(k);
-            let exp_theta_o = self.matrix_exponential(&(op.matrix * Complex64(op.matrix.clone() * Complex64::new(0.0, thetas[k])));
+            let exp_theta_o = self.matrix_exponential(            let exp_theta_o = self.matrix_exponential(&(op.matrix * Complex64(op.matrix.clone() * Complex64::new(0.0, thetas[k])));(op.matrix.clone() * Complex64::new(0.0, thetas[k])));
             result = result * exp_theta_o;
         }
         
