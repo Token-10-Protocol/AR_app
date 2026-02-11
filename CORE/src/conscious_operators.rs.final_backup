@@ -2,7 +2,6 @@
 //! 7 familias × 6 operadores = 42
 //! Constantes de estructura fᵢⱼₖ: NO CONMUTATIVAS (ASIMÉTRICAS POR CONSTRUCCIÓN)
 //! Verificado: 11 Feb 2026 - Corrección Monster Aplicada
-//! Versión: REESCRITURA COMPLETA - CERTIFICADA
 
 use nalgebra::{DMatrix, DVector};
 use num_complex::Complex64;
@@ -60,19 +59,20 @@ impl ConsciousOperators {
         for i in 0..TOTAL_OPERATORS {
             for j in 0..TOTAL_OPERATORS {
                 for k in 0..TOTAL_OPERATORS {
-                    // fᵢⱼₖ - valor para AB
-                    let f_ab = PHI.powi(-((i + j + k) as i32)) * 
+                    // fᵢⱼₖ - valor base
+                    let f_ij = PHI.powi(-((i + j + k) as i32)) * 
                              ((i + 1) * (j + 1) % (k + 2)) as f64 / MONSTER_196884;
                     
-                    if f_ab.abs() > 1e-6 {
-                        f_ijk.push(((i, j, k), f_ab));
+                    // Solo guardar si es significativo
+                    if f_ij.abs() > 1e-6 {
+                        f_ijk.push(((i, j, k), f_ij));
                     }
                     
-                    // fⱼᵢₖ - valor para BA (explícitamente diferente)
+                    // fⱼᵢₚₐᵣₐ - EXPLÍCITAMENTE DIFERENTE cuando i ≠ j
                     if i != j {
-                        let f_ba = f_ab * 0.6180339887498948482; // φ⁻¹
-                        if f_ba.abs() > 1e-6 {
-                            f_ijk.push(((j, i, k), f_ba));
+                        let f_ji = f_ij * 0.6180339887498948482; // φ⁻¹
+                        if f_ji.abs() > 1e-6 {
+                            f_ijk.push(((j, i, k), f_ji));
                         }
                     }
                 }
@@ -167,35 +167,19 @@ impl ConsciousOperators {
         result
     }
     
-    // PRODUCTO AB: usa constantes (i,j,k)
     pub fn multiply(&self, a: &DVector<f64>, b: &DVector<f64>) -> DVector<f64> {
         let mut result = DVector::zeros(DIM);
-        for &((i, j, k), f_ij) in &self.f_ijk {
+        for &((i, j, k), f_ijk) in &self.f_ijk {
             if i < DIM && j < DIM && k < DIM {
-                result[k] += f_ij * a[i] * b[j];
+                result[k] += f_ijk * a[i] * b[j];
             }
         }
         result
     }
     
-    // PRODUCTO BA: usa constantes (j,i,k) - EXPLÍCITAMENTE DIFERENTES
-    pub fn multiply_rev(&self, a: &DVector<f64>, b: &DVector<f64>) -> DVector<f64> {
-        let mut result = DVector::zeros(DIM);
-        for &((i, j, k), f_ji) in &self.f_ijk {
-            if i < DIM && j < DIM && k < DIM {
-                // ATENCIÓN: aquí i,j están en el orden almacenado
-                // Para BA necesitamos a[j] * b[i] con constante (j,i,k)
-                result[k] += f_ji * a[j] * b[i];
-            }
-        }
-        result
-    }
     
-    // CONMUTADOR: [A,B] = AB - BA
     pub fn conmutador(&self, a: &DVector<f64>, b: &DVector<f64>) -> DVector<f64> {
-        let ab = self.multiply(a, b);
-        let ba = self.multiply_rev(a, b);
-        ab - ba
+        self.multiply(a, b) - self.multiply_rev(a, b)
     }
     
     pub fn get_operator(&self, index: usize) -> &Operator {
@@ -275,7 +259,7 @@ mod tests {
         }
         
         println!("🔴 Pares asimétricos encontrados: {}", count_asim);
-        assert!(asimetrico, "TODAS las constantes son simétricas");
+        assert!(asimetrico, "TODAS las constantes son simétricas: fᵢⱼₖ = fⱼᵢₖ");
         println!("✅ CONSTANTES ESTRUCTURA: asimétricas verificadas");
     }
 }
