@@ -1,0 +1,12 @@
+    pub fn multiply_rev(&self, a: &DVector<f64>, b: &DVector<f64>) -> DVector<f64> {
+        let mut result = DVector::zeros(DIM);
+        // Buscar constantes con orden (j,i,k) para AB ≠ BA
+        for &((i, j, k), f_ijk) in &self.f_ijk {
+            if i < DIM && j < DIM && k < DIM {
+                // Solo usar cuando i,j están en orden inverso al original
+                // La constante ya está almacenada como (j,i,k) con su propio valor
+                result[k] += f_ijk * a[j] * b[i];
+            }
+        }
+        result
+    }
