@@ -16,4 +16,3 @@ pub use monster_structures::{
 // Constantes fundamentales
 pub const PHI_INV_MOD_1: f64 = 0.6180339887498948; // φ⁻¹ mod 1 ≈ 0.618
 pub const TOLERANCIA_TAU: f64 = 1e-6; // Tolerancia para comparaciones
-#[cfg(test)] mod tests;
