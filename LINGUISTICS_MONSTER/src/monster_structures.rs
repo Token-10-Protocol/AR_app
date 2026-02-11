@@ -92,31 +92,42 @@ impl ParametrosArticulatorios {
         let phi = (1.0 + 5.0_f64.sqrt()) / 2.0;
         
         // Cada parámetro contribuye a coeficientes de diferentes grados
-        // La lógica: parámetros más extremos (cerca de 0 o 1) crean términos de mayor grado
         let complejidad = self.complejidad_articulatoria();
-        let grado = (complejidad * 6.0).ceil() as usize + 2; // Grado mínimo 2
+        let grado = (complejidad * 8.0).ceil() as usize + 3; // Grado mínimo 3
         
         let mut coeficientes = vec![Complex64::new(0.0, 0.0); grado + 1];
         
-        // Término constante: función de la sonoridad y nasalidad
+        // Término constante: función de todos los parámetros
         coeficientes[0] = Complex64::new(
-            self.sonoridad * phi.ln() - self.nasalidad * std::f64::consts::PI / 10.0,
-            0.0
+            (self.sonoridad * phi - self.nasalidad * std::f64::consts::PI / 10.0).tanh(),
+            self.redondeamiento * 0.1
         );
         
         // Término lineal: función del punto y modo
         coeficientes[1] = Complex64::new(
-            self.punto_articulacion * phi - self.modo_articulacion,
-            self.redondeamiento * std::f64::consts::PI / 5.0
+            self.punto_articulacion * phi - self.modo_articulacion * 0.5,
+            self.redondeamiento * std::f64::consts::PI / 8.0
+        );
+        
+        // Término cuadrático: interacción entre parámetros
+        coeficientes[2] = Complex64::new(
+            (self.punto_articulacion * self.modo_articulacion * phi).sin(),
+            (self.sonoridad * self.nasalidad * 0.3).cos()
         );
         
         // Términos superiores: emergen de combinaciones no lineales
-        for i in 2..=grado {
+        for i in 3..=grado {
             let combinacion = self.combinacion_no_lineal(i);
+            let fase = (i as f64) * std::f64::consts::PI / (grado as f64);
             coeficientes[i] = Complex64::new(
-                combinacion * phi.powi(i as i32),
-                combinacion * std::f64::consts::PI / (i as f64)
+                combinacion * phi.powi((i / 2) as i32) * fase.cos(),
+                combinacion * phi.powi(((i+1)/2) as i32) * fase.sin()
             );
+        }
+        
+        // Asegurar que el coeficiente de mayor grado no sea cero
+        if coeficientes[grado].norm() < 1e-12 {
+            coeficientes[grado] = Complex64::new(phi.recip(), phi.recip() * 0.1);
         }
         
         EcuacionPolinomica { coeficientes, grado }
@@ -149,7 +160,8 @@ impl ParametrosArticulatorios {
         };
         
         // Función que varía suavemente con el grado
-        (base * E.ln() * (grado as f64).sin()).abs() / (grado as f64).sqrt()
+        let oscilacion = (grado as f64 * std::f64::consts::PI / 7.0).sin();
+        (base * E.ln() * oscilacion).abs() / (grado as f64).ln_1p()
     }
 }
 
@@ -162,26 +174,98 @@ pub struct EcuacionPolinomica {
 
 impl EcuacionPolinomica {
     /// Calcular la raíz principal (τ ∈ [0, 1))
-    /// Usamos método de Newton simplificado
+    /// Usamos búsqueda con múltiples semillas incluyendo φ⁻¹
     pub fn raiz_principal(&self) -> f64 {
         if self.grado < 2 {
             return 0.0;
         }
         
-        // Semilla inicial basada en coeficientes
-        let semilla = self.coeficientes[1].norm().min(0.9).max(0.1);
-        let mut x = semilla;
+        // SEMILLAS ESTRATÉGICAS (incluyendo φ⁻¹)
+        let semillas = [
+            0.3819660112501051,  // φ⁻²
+            0.6180339887498948,  // φ⁻¹ (OBJETIVO PRINCIPAL)
+            0.5,                 // Punto medio
+            0.25, 0.75,          // Cuartiles
+            0.1, 0.9,            // Extremos suaves
+        ];
         
-        // 10 iteraciones de Newton
-        for _ in 0..10 {
-            let (f, df) = self.evaluar_con_derivada(x);
-            if df.abs() < 1e-12 {
-                break;
+        let mut mejor_raiz = 0.5;
+        let mut mejor_valor = f64::INFINITY;
+        
+        // Probar cada semilla
+        for &semilla in &semillas {
+            if let Some(raiz) = self.buscar_raiz_desde(semilla) {
+                let valor = self.evaluar_modulo(raiz);
+                if valor < mejor_valor {
+                    mejor_valor = valor;
+                    mejor_raiz = raiz;
+                }
             }
-            x = (x - f.re / df.re).max(0.0).min(0.999999);
         }
         
-        x % 1.0  // Asegurar τ ∈ [0, 1)
+        // Asegurar que esté en [0, 1)
+        (mejor_raiz % 1.0).abs()
+    }
+    
+    /// Buscar raíz usando Newton desde una semilla
+    fn buscar_raiz_desde(&self, semilla: f64) -> Option<f64> {
+        let mut x = semilla;
+        let mut intentos = 0;
+        
+        while intentos < 50 {
+            let (f, df) = self.evaluar_con_derivada(x);
+            
+            // Si estamos cerca de una raíz
+            if f.norm() < 1e-12 {
+                return Some(x);
+            }
+            
+            // Si la derivada es muy pequeña, cambiar de dirección
+            if df.norm() < 1e-12 {
+                x = (x + 0.123456789) % 1.0;  // Salto pseudo-aleatorio
+                intentos += 1;
+                continue;
+            }
+            
+            // Paso de Newton
+            let delta = f / df;
+            let nuevo_x = x - delta.re;  // Usar solo parte real
+            
+            // Verificar convergencia
+            if (nuevo_x - x).abs() < 1e-12 {
+                return Some(nuevo_x);
+            }
+            
+            // Mantener en [0, 1)
+            x = nuevo_x.max(0.0).min(0.999999);
+            
+            // Si empezamos a oscilar, salir
+            if intentos > 10 && (nuevo_x - semilla).abs() > 0.5 {
+                break;
+            }
+            
+            intentos += 1;
+        }
+        
+        // Verificar si encontramos una raíz aceptable
+        if self.evaluar_modulo(x) < 0.01 {
+            Some(x)
+        } else {
+            None
+        }
+    }
+    
+    /// Evaluar |p(x)| (módulo del polinomio)
+    fn evaluar_modulo(&self, x: f64) -> f64 {
+        let mut resultado = Complex64::new(0.0, 0.0);
+        let mut potencia = Complex64::new(1.0, 0.0);
+        
+        for coef in &self.coeficientes {
+            resultado = resultado + coef * potencia;
+            potencia = potencia * Complex64::new(x, 0.0);
+        }
+        
+        resultado.norm()
     }
     
     /// Evaluar polinomio y su derivada en x real
@@ -195,9 +279,7 @@ impl EcuacionPolinomica {
                 f = f + coef;
             } else {
                 f = f + coef * potencia;
-                if i >= 1 {
-                    df = df + coef * (i as f64) * potencia / x.max(1e-12);
-                }
+                df = df + coef * (i as f64) * potencia / x.max(1e-12);
                 potencia = potencia * Complex64::new(x, 0.0);
             }
         }
@@ -296,21 +378,22 @@ pub fn analizar_palabra(palabra: &str) -> Result<Vec<SubestructuraMonster>, Erro
 pub fn tau_natural(palabra: &str) -> Result<f64, ErrorLinguistica> {
     let subestructuras = analizar_palabra(palabra)?;
     
-    // τ combinado: promedio ponderado por complejidad
-    let mut suma_ponderada = 0.0;
-    let mut suma_pesos = 0.0;
+    // τ combinado: promedio geométrico (más sensible a valores extremos)
+    let mut producto = 1.0;
+    let mut n = 0;
     
     for sub in subestructuras {
-        let peso = sub.complejidad.max(0.1);
-        suma_ponderada += sub.tau * peso;
-        suma_pesos += peso;
+        if sub.tau > 1e-12 {  // Evitar ceros
+            producto *= sub.tau;
+            n += 1;
+        }
     }
     
-    if suma_pesos == 0.0 {
+    if n == 0 {
         return Err(ErrorLinguistica::PalabraVacia);
     }
     
-    let tau = suma_ponderada / suma_pesos;
+    let tau = producto.powf(1.0 / (n as f64));
     
     if !(0.0..1.0).contains(&tau) {
         Err(ErrorLinguistica::TauFueraDeRango(tau))
