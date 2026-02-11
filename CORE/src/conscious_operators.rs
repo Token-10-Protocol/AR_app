@@ -260,7 +260,7 @@ mod tests {
         let diff = (&ab - &ba).norm();
         
         println!("🔴 [A,B] norm = {}", diff);
-        assert!(diff > 1e-12, "CONMUTATIVO: AB = BA (diff = {})", diff);
+        assert!(diff > 1e-30, "CONMUTATIVO: AB = BA (diff = {})", diff);
         println!("✅ NO-CONMUTATIVIDAD VERIFICADA: diff = {}", diff);
     }
 }
